@@ -23,6 +23,17 @@ from .validators import (
 )
 
 
+def normalizar_email(email: str) -> str:
+    """
+    Minusculas por inteiro.
+
+    O normalize_email do Django so abaixa o dominio: "Joao@Exemplo.com" vira
+    "Joao@exemplo.com". Como o login e por e-mail, isso permitiria duas contas
+    que o usuario enxerga como a mesma.
+    """
+    return BaseUserManager.normalize_email(str(email or "")).lower()
+
+
 class UsuarioManager(BaseUserManager):
     """Manager sem username: a identificacao e o e-mail."""
 
@@ -32,7 +43,7 @@ class UsuarioManager(BaseUserManager):
         if not email:
             raise ValueError("E-mail e obrigatorio.")
 
-        email = self.normalize_email(email)
+        email = normalizar_email(email)
 
         if extra.get("cpf"):
             extra["cpf"] = so_digitos(extra["cpf"])
@@ -140,7 +151,7 @@ class Usuario(AbstractUser):
     def clean(self):
         # guarda o CPF sempre so com digitos: a unicidade depende disso
         self.cpf = so_digitos(self.cpf)
-        self.email = UsuarioManager.normalize_email(self.email)
+        self.email = normalizar_email(self.email)
 
         super().clean()
 

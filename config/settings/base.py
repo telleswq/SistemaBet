@@ -6,6 +6,7 @@ Este arquivo vai para um repositorio publico.
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -37,12 +38,16 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
+THIRD_PARTY_APPS = [
+    "axes",
+]
+
 LOCAL_APPS = [
     "apps.core",
     "apps.contas",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -54,6 +59,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # precisa ser o ultimo: conta as tentativas depois da autenticacao
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -95,6 +102,34 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Modelo de usuario proprio desde o inicio: trocar depois de existir dado
 # significa migrar chaves estrangeiras em toda a base.
 AUTH_USER_MODEL = "contas.Usuario"
+
+# --- Autenticacao ------------------------------------------------------
+
+AUTHENTICATION_BACKENDS = [
+    # o backend do axes vem primeiro: bloqueia antes de conferir a senha
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+LOGIN_URL = "contas:login"
+LOGIN_REDIRECT_URL = "core:home"
+LOGOUT_REDIRECT_URL = "core:home"
+
+# Bloqueio de tentativas. O sistema anterior nao tinha nenhum: dava para
+# testar senha indefinidamente.
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=30)
+# trava a combinacao usuario+IP: nao derruba todos os usuarios de um mesmo IP,
+# e nao deixa um atacante trocar de IP para continuar no mesmo usuario
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+# O axes assume por padrao o USERNAME_FIELD do modelo ("email"), mas o campo
+# que chega no POST se chama "username" (convencao do AuthenticationForm).
+# Sem isto o usuario e gravado como None e o bloqueio vira bloqueio de IP —
+# pior ainda, a consulta por (username, ip) nao casa e a senha CORRETA passa.
+AXES_USERNAME_FORM_FIELD = "username"
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_TEMPLATE = "contas/bloqueado.html"
+AXES_VERBOSE = True
 
 # --- Senhas ------------------------------------------------------------
 # Argon2 primeiro. O sistema antigo usava MD5 sem salt; aqui isso nao se repete.
