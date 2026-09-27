@@ -39,6 +39,7 @@ DJANGO_APPS = [
 
 LOCAL_APPS = [
     "apps.core",
+    "apps.contas",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
@@ -90,6 +91,10 @@ DATABASES = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Modelo de usuario proprio desde o inicio: trocar depois de existir dado
+# significa migrar chaves estrangeiras em toda a base.
+AUTH_USER_MODEL = "contas.Usuario"
 
 # --- Senhas ------------------------------------------------------------
 # Argon2 primeiro. O sistema antigo usava MD5 sem salt; aqui isso nao se repete.
