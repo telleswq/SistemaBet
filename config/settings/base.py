@@ -181,6 +181,11 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 X_FRAME_OPTIONS = "DENY"
 
+# --- E-mail ------------------------------------------------------------
+
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "nao-responda@localhost")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
 # --- Log ---------------------------------------------------------------
 
 LOGGING = {

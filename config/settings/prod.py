@@ -40,3 +40,18 @@ STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+
+# --- E-mail ----------------------------------------------------------------
+# Sem configuracao explicita o Django usa SMTP em localhost:25: o envio falha,
+# e como a falha e capturada para nao derrubar o cadastro, ninguem receberia o
+# link de verificacao e o problema passaria despercebido. Mesma filosofia do
+# SECRET_KEY: melhor nao subir do que subir sem conseguir verificar e-mail.
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = env("EMAIL_HOST", obrigatorio=True)
+EMAIL_PORT = int(env("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", obrigatorio=True)
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", obrigatorio=True)
+EMAIL_USE_TLS = True
+# sem timeout, um SMTP travado prende o worker durante o cadastro
+EMAIL_TIMEOUT = 10

@@ -78,4 +78,8 @@ jobs:
         run: python manage.py check --deploy --settings=config.settings.prod
         env:
           ALLOWED_HOSTS: exemplo.com
+          # prod.py exige SMTP configurado; valores de fachada so para a checagem
+          EMAIL_HOST: smtp.exemplo.com
+          EMAIL_HOST_USER: ci
+          EMAIL_HOST_PASSWORD: ci
       - run: pytest
