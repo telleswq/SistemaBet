@@ -1,0 +1,38 @@
+{% comment %}
+Item do menu lateral (secao 3.7 da especificacao).
+
+Parametros:
+  rotulo   texto visivel (obrigatorio)
+  icone    nome no conjunto de _componentes/icone.html (obrigatorio)
+  destino  URL. Vazia = destino que ainda nao existe -> item desabilitado com
+           etiqueta "Em breve", conforme o estado "desabilitado" da secao 3.7.
+  rota     view_name da rota (ex. "core:home"), so para marcar o item ativo.
+  externo  se verdadeiro, abre em outra aba.
+
+O item ativo recebe aria-current="page", fundo bg-marca/15, texto marca-300 e
+uma barra de 3px na borda esquerda: cor sozinha nao pode ser o unico
+indicador de estado (WCAG 1.4.1).
+{% endcomment %}
+{% if destino %}
+  {% if rota and request.resolver_match.view_name == rota %}
+    <a href="{{ destino }}" aria-current="page"
+       class="item-menu item-menu-ativo relative">
+      <span class="absolute inset-y-1.5 left-0 w-[3px] rounded-r bg-marca" aria-hidden="true"></span>
+      {% include "_componentes/icone.html" with nome=icone classe="h-5 w-5 text-marca" %}
+      <span>{{ rotulo }}</span>
+    </a>
+  {% else %}
+    <a href="{{ destino }}" class="item-menu group"
+       {% if externo %}target="_blank" rel="noopener noreferrer"{% endif %}>
+      {% include "_componentes/icone.html" with nome=icone classe="h-5 w-5 text-texto-3 transition-colors group-hover:text-texto-2" %}
+      <span>{{ rotulo }}</span>
+      {% if externo %}<span class="sr-only">(abre em outra aba)</span>{% endif %}
+    </a>
+  {% endif %}
+{% else %}
+  <span class="item-menu item-menu-inativo" aria-disabled="true">
+    {% include "_componentes/icone.html" with nome=icone classe="h-5 w-5 text-texto-3" %}
+    <span>{{ rotulo }}</span>
+    <span class="ml-auto shrink-0 rounded bg-fundo-elevado px-1.5 py-0.5 text-2xs font-medium text-texto-2">Em breve</span>
+  </span>
+{% endif %}

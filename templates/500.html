@@ -1,0 +1,50 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-br" class="h-full">
+{% comment %}
+Django usa `templates/500.html` automaticamente (django.views.defaults.
+server_error). Nao precisa de rota nem de view.
+
+Esta pagina NAO estende base.html de proposito: o `server_error` renderiza sem
+`request`, portanto sem context processors (nada de `user`, `messages`,
+`request`) — e, mais importante, e a pagina que aparece justamente quando algo
+ja falhou. Quanto menos ela depende, menor a chance de falhar tambem e o
+visitante cair no "Server Error (500)" cru do Django.
+
+Nao ha detalhe do erro aqui: stack trace em producao e informacao para
+atacante, nao para jogador. O erro esta no log do servidor.
+{% endcomment %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141417">
+  <title>Erro no servidor — SistemaBet</title>
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="grid min-h-full place-items-center bg-fundo p-4 font-sans text-sm text-texto antialiased">
+  <main class="w-full max-w-lg rounded-2xl border border-borda bg-fundo-card px-6 py-12 text-center">
+    <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-erro-fundo text-erro">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+           class="h-7 w-7" aria-hidden="true">
+        <rect width="20" height="8" x="2" y="2" rx="2"/>
+        <rect width="20" height="8" x="2" y="14" rx="2"/>
+        <path d="M6 6h.01"/>
+        <path d="M6 18h.01"/>
+      </svg>
+    </span>
+
+    <p class="mt-4 text-2xs font-semibold uppercase tracking-widest text-texto-3">Erro 500</p>
+    <h1 class="mt-1 text-2xl font-semibold text-texto">Algo saiu errado aqui</h1>
+    <p class="mx-auto mt-3 max-w-sm text-sm text-texto-2">
+      A falha é nossa, não sua. Já registramos o problema. Tente de novo em alguns instantes.
+    </p>
+    <p class="mx-auto mt-3 max-w-sm text-sm text-texto-2">
+      Se você estava no meio de um depósito ou de um saque, <strong class="font-semibold text-texto">não
+      repita a operação</strong> sem antes conferir o seu extrato.
+    </p>
+
+    <a href="/" class="btn-marca btn-lg mt-6">Ir para o início</a>
+  </main>
+</body>
+</html>

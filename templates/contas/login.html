@@ -1,10 +1,12 @@
 {% extends "contas/_auth_base.html" %}
 {% block titulo %}Entrar{% endblock %}
-{% block aba_entrar %}border-marca text-white{% endblock %}
 {% block botao %}Entrar{% endblock %}
 {% block extra_form %}
   <div class="text-right">
-    <a href="{% url 'contas:senha_redefinir' %}" class="text-xs text-white/50 hover:text-marca">
+    <a href="{% url 'contas:senha_redefinir' %}"
+       class="inline-flex rounded py-1 text-xs text-texto-2 transition-colors duration-150 ease-out
+              hover:text-marca-400 focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-marca focus-visible:ring-offset-2 focus-visible:ring-offset-fundo-card">
       Esqueci minha senha
     </a>
   </div>

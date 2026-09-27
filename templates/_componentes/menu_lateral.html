@@ -1,0 +1,163 @@
+{% load static %}{% comment %}
+Menu lateral — MARKUP UNICO (secoes 2.4 e 3.7 da especificacao).
+
+Este arquivo e incluido UMA vez. Abaixo de `lg` ele e uma gaveta (fixed,
+translada para fora da tela); a partir de `lg` e a coluna fixa de 256px. O
+antigo duplicava o menu inteiro dentro de um modal do Bootstrap, o que
+duplicava `id` no documento e dobrava a ordem de tabulacao — inclusive com o
+menu invisivel.
+
+O que troca com o breakpoint e apenas posicao e o cabecalho da gaveta
+(`lg:hidden`). Nenhum destino aparece duas vezes.
+
+Fechada, a gaveta fica `invisible` — e o CSS, nao o JS, que a tira da ordem
+de tabulacao e da arvore de acessibilidade. `lg:visible` devolve o menu no
+desktop. Assim um estado de JS obsoleto nunca consegue deixar o menu de
+desktop inalcancavel pelo teclado (aconteceu em teste com `inert`).
+
+Estado, foco e travamento de rolagem ficam no componente Alpine `appShell`,
+definido em base.html.
+{% endcomment %}
+<aside id="menu-lateral"
+       x-ref="gaveta"
+       aria-label="Menu"
+       x-bind:data-aberto="menuAberto"
+       x-bind:role="estreito ? 'dialog' : null"
+       x-bind:aria-modal="estreito ? 'true' : null"
+       @keydown.tab="prenderFoco($event)"
+       {# Esc fecha: o foco fica preso dentro da gaveta, entao o evento nasce aqui #}
+       @keydown.escape.prevent.stop="fecharMenu()"
+       class="invisible fixed inset-y-0 left-0 z-60 flex w-gaveta max-w-[85vw]
+              -translate-x-full flex-col border-r border-borda bg-fundo
+              transition-[transform,visibility] duration-250 ease-gaveta
+              data-[aberto=true]:visible data-[aberto=true]:translate-x-0
+              lg:visible lg:static lg:z-auto lg:block lg:w-menu lg:max-w-none
+              lg:shrink-0 lg:translate-x-0 lg:border-r-0 lg:bg-transparent
+              lg:transition-none">
+
+  {# Cabecalho: existe so na gaveta. Em desktop a logo esta na barra superior. #}
+  <div class="flex h-barra-sm shrink-0 items-center justify-between gap-2 border-b border-borda px-4 lg:hidden">
+    <a href="{{ url_home }}"
+       class="flex items-center rounded-lg focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-marca focus-visible:ring-offset-2 focus-visible:ring-offset-fundo">
+      <img src="{% static 'img/logo.png' %}" alt="SistemaBet — página inicial" class="h-6 w-auto">
+    </a>
+    <button type="button" x-ref="fecharMenu" @click="fecharMenu()"
+            aria-label="Fechar menu"
+            class="grid h-11 w-11 place-items-center rounded-lg text-texto-2
+                   transition-colors duration-150 ease-out hover:bg-fundo-elevado hover:text-texto
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca
+                   focus-visible:ring-offset-2 focus-visible:ring-offset-fundo">
+      {% include "_componentes/icone.html" with nome="fechar" %}
+    </button>
+  </div>
+
+  <nav aria-label="Navegação principal"
+       class="flex-1 overflow-y-auto overscroll-contain p-6
+              lg:sticky lg:top-barra lg:max-h-[calc(100vh-64px)] lg:flex-none lg:px-0 lg:py-6">
+
+    {% comment %} Acoes de conta: so na gaveta (secao 2.4). O saldo fica na barra
+       superior, uma unica vez — dois <span aria-live> com o mesmo valor
+       fariam o leitor de tela anunciar o saldo duas vezes. {% endcomment %}
+    <div class="mb-6 lg:hidden">
+      {% if user.is_authenticated %}
+        {% if url_depositar %}
+          <a href="{{ url_depositar }}" class="btn-marca btn-lg w-full">
+            {% include "_componentes/icone.html" with nome="mais" classe="h-4 w-4" %}
+            Depositar
+          </a>
+        {% else %}
+          <button type="button" class="btn-marca btn-lg w-full" disabled>
+            {% include "_componentes/icone.html" with nome="mais" classe="h-4 w-4" %}
+            Depositar <span class="text-2xs font-medium">(em breve)</span>
+          </button>
+        {% endif %}
+      {% else %}
+        <div class="grid grid-cols-2 gap-2">
+          <a href="{% url 'contas:login' %}" class="btn-vazado btn-lg">Entrar</a>
+          <a href="{% url 'contas:cadastro' %}" class="btn-marca btn-lg">Cadastrar</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="space-y-2">
+      {% include "_componentes/item_menu.html" with rotulo="Início" icone="casa" destino=url_home rota="core:home" %}
+
+      {% if user.is_authenticated %}
+        {% include "_componentes/item_menu.html" with rotulo="Minha Conta" icone="conta" destino=url_perfil rota="contas:perfil" %}
+        <form method="post" action="{% url 'contas:logout' %}">
+          {% csrf_token %}
+          {% comment %} Logout por POST: por GET, um <img src> ou um link em e-mail
+             derruba a sessao do jogador (o antigo faz por GET). {% endcomment %}
+          <button type="submit" class="item-menu w-full">
+            {% include "_componentes/icone.html" with nome="sair" classe="h-5 w-5 text-texto-3" %}
+            <span>Sair</span>
+          </button>
+        </form>
+      {% endif %}
+
+      {% include "_componentes/item_menu.html" with rotulo="Indique e Ganhe" icone="indique" destino=url_indique rota="afiliados:indique" %}
+      {% include "_componentes/item_menu.html" with rotulo="Todos os jogos" icone="jogos" destino=url_jogos rota="jogos:catalogo" %}
+    </div>
+
+    <hr class="my-6 border-borda">
+
+    <div class="space-y-2">
+      {% comment %} Item expansivel. Aberto por padrao no primeiro acesso, como no antigo
+         (.arrow-drop-menu ja vem com a classe `active`); a escolha do usuario
+         passa a ser lembrada. {% endcomment %}
+      <div x-data="{ aberto: lerPreferencia('menu.populares', true) }">
+        <button type="button"
+                @click="aberto = !aberto; gravarPreferencia('menu.populares', aberto)"
+                x-bind:aria-expanded="aberto"
+                aria-controls="menu-populares"
+                class="item-menu w-full">
+          {% include "_componentes/icone.html" with nome="populares" classe="h-5 w-5 text-texto-3" %}
+          <span>Populares</span>
+          <span class="ml-auto transition-transform duration-200 ease-out"
+                x-bind:class="aberto && 'rotate-90'">
+            {% include "_componentes/icone.html" with nome="chevron-direita" classe="h-4 w-4" %}
+          </span>
+        </button>
+
+        <div id="menu-populares" x-show="aberto" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-end="opacity-0"
+             class="mt-2 space-y-1 pl-4">
+          {% comment %} Os sub-itens sao jogos (arte 32px + nome), e dependem do catalogo
+             (Fase 4). Ate lá, o lugar deles esta dito em texto em vez de
+             ficar um vazio silencioso. {% endcomment %}
+          <p class="px-4 py-2 text-xs text-texto-3">
+            Os jogos em destaque aparecem aqui quando o catálogo entrar no ar.
+          </p>
+          {% if url_jogos %}
+            <a href="{{ url_jogos }}" class="item-menu justify-between text-xs text-marca-400 hover:text-marca-300">
+              <span>Ver todos</span>
+              {% include "_componentes/icone.html" with nome="chevron-direita" classe="h-3 w-3" %}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% include "_componentes/item_menu.html" with rotulo="Roletas" icone="roletas" destino=url_roletas rota="jogos:roletas" %}
+      {% include "_componentes/item_menu.html" with rotulo="Cassino" icone="cassino" destino=url_cassino rota="jogos:cassino" %}
+      {% include "_componentes/item_menu.html" with rotulo="Cassino Ao vivo" icone="ao-vivo" destino=url_cassino_aovivo rota="jogos:cassino_aovivo" %}
+    </div>
+
+    <hr class="my-6 border-borda">
+
+    <div class="space-y-2">
+      {% include "_componentes/item_menu.html" with rotulo="Suporte" icone="suporte" destino=url_suporte externo=True %}
+    </div>
+
+    {% comment %} Sociais: o antigo so renderiza cada icone se a URL estiver configurada,
+       e nesta instalacao nenhuma esta — por isso a faixa nao aparece. Quando
+       houver fonte para elas, entra aqui (40x40px cada). {% endcomment %}
+
+    <p class="mt-6 text-2xs text-texto-3">
+      SistemaBet &copy; {% now "Y" %}. Todos os direitos reservados.
+    </p>
+  </nav>
+</aside>

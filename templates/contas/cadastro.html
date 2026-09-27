@@ -1,12 +1,16 @@
 {% extends "contas/_auth_base.html" %}
 {% block titulo %}Cadastrar{% endblock %}
-{% block aba_cadastrar %}border-marca text-white{% endblock %}
 {% block botao %}Criar conta{% endblock %}
 {% block rodape %}
-  <p class="mt-4 text-center text-[11px] leading-snug text-white/35">
+  <p class="mt-4 text-center text-xs leading-snug text-texto-3">
     Ao clicar no botão Criar conta, você aceita nossos
-    <a href="#" class="text-white/60 hover:text-marca">termos de uso</a> e
-    <a href="#" class="text-white/60 hover:text-marca">política de privacidade</a>.
+    {% if url_termos %}
+      <a href="{{ url_termos }}" class="text-texto-2 underline hover:text-marca-400">termos de uso</a>
+    {% else %}<span class="text-texto-2">termos de uso</span>{% endif %}
+    e
+    {% if url_privacidade %}
+      <a href="{{ url_privacidade }}" class="text-texto-2 underline hover:text-marca-400">política de privacidade</a>
+    {% else %}<span class="text-texto-2">política de privacidade</span>{% endif %}.
     É necessário ter 18 anos ou mais.
   </p>
 {% endblock %}

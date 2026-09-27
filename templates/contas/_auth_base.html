@@ -1,59 +1,89 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block corpo %}
-  <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-    <div class="overflow-hidden rounded-2xl border border-fundo-borda bg-fundo-card
-                shadow-2xl md:grid md:grid-cols-2">
+{% comment %}
+Layout das telas de autenticacao. Entrar e Cadastrar sao PAGINAS, nao modais
+(secao 3.8): URL compartilhavel, botao voltar funcionando, gerenciador de senha
+do navegador funcionando e erro de validacao que sobrevive ao recarregamento.
 
-      {# painel visual, equivalente ao banner do modal original #}
-      <div class="relative hidden bg-gradient-to-br from-marca/30 via-fundo to-fundo md:block">
-        <div class="absolute inset-0 opacity-30"
-             style="background-image:radial-gradient(circle at 30% 20%, #FF2338 0, transparent 55%)"></div>
+Mantem a casca (menu e rodape) do resto da aplicacao: o `<main id="conteudo">`
+continua sendo o alvo do link "Pular para o conteudo".
+{% endcomment %}
+
+{% block corpo %}
+  <main id="conteudo" class="min-w-0 flex-1 py-6 lg:py-10">
+    {% include "_componentes/mensagens.html" %}
+
+    <div class="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-borda bg-fundo-card
+                md:grid md:grid-cols-2">
+
+      {# Painel visual, equivalente ao banner do modal original. Decorativo. #}
+      <div class="relative hidden bg-gradient-to-br from-marca-900/70 via-fundo-card to-fundo-card md:block"
+           aria-hidden="true">
+        <div class="absolute inset-0 opacity-40"
+             style="background-image:radial-gradient(circle at 30% 20%, #E32D47 0, transparent 55%)"></div>
         <div class="relative flex h-full flex-col justify-end p-8">
-          <div class="text-3xl font-bold leading-tight">
+          <p class="text-2xl font-bold leading-tight text-texto">
             Sua próxima<br>rodada começa aqui
-          </div>
-          <p class="mt-3 text-sm text-white/50">
+          </p>
+          <p class="mt-3 text-sm text-texto-2">
             Depósito e saque via PIX. Proibido para menores de 18 anos.
           </p>
         </div>
       </div>
 
-      <div class="p-6 sm:p-10">
-        <img src="{% static 'img/logo.png' %}" alt="" class="mb-6 h-9 w-auto">
+      <div class="p-6 sm:p-8">
+        <img src="{% static 'img/logo.png' %}" alt="" class="h-8 w-auto">
 
-        <h3 class="text-xl font-bold">Estamos te esperando para mais uma rodada!</h3>
-        <p class="mt-1 text-sm text-white/50">Insira seus dados e comece a diversão</p>
+        <h1 class="mt-6 text-xl font-semibold text-texto">
+          {% block cabecalho_titulo %}Estamos te esperando para mais uma rodada!{% endblock %}
+        </h1>
+        <p class="mt-1 text-sm text-texto-2">
+          {% block cabecalho_apoio %}Insira seus dados e comece a diversão{% endblock %}
+        </p>
 
-        <div class="mt-6 flex gap-2 border-b border-fundo-borda">
-          <a href="{% url 'contas:login' %}"
-             class="-mb-px border-b-2 px-4 py-2 text-sm font-semibold
-             {% block aba_entrar %}border-transparent text-white/40 hover:text-white{% endblock %}">
-            Entrar
-          </a>
-          <a href="{% url 'contas:cadastro' %}"
-             class="-mb-px border-b-2 px-4 py-2 text-sm font-semibold
-             {% block aba_cadastrar %}border-transparent text-white/40 hover:text-white{% endblock %}">
-            Cadastrar
-          </a>
-        </div>
+        {% if request.resolver_match.view_name == "contas:login" or request.resolver_match.view_name == "contas:cadastro" %}
+          <nav class="mt-6 flex gap-2 border-b border-borda" aria-label="Entrar ou cadastrar">
+            {% if request.resolver_match.view_name == "contas:login" %}
+              <span class="-mb-px border-b-2 border-marca px-4 py-2 text-sm font-semibold text-texto"
+                    aria-current="page">Entrar</span>
+            {% else %}
+              <a href="{% url 'contas:login' %}"
+                 class="-mb-px rounded-t-lg border-b-2 border-transparent px-4 py-2 text-sm font-semibold
+                        text-texto-2 transition-colors duration-150 ease-out hover:text-texto
+                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca">Entrar</a>
+            {% endif %}
+
+            {% if request.resolver_match.view_name == "contas:cadastro" %}
+              <span class="-mb-px border-b-2 border-marca px-4 py-2 text-sm font-semibold text-texto"
+                    aria-current="page">Cadastrar</span>
+            {% else %}
+              <a href="{% url 'contas:cadastro' %}"
+                 class="-mb-px rounded-t-lg border-b-2 border-transparent px-4 py-2 text-sm font-semibold
+                        text-texto-2 transition-colors duration-150 ease-out hover:text-texto
+                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca">Cadastrar</a>
+            {% endif %}
+          </nav>
+        {% endif %}
 
         {% if form.non_field_errors %}
-          <div class="mt-5 rounded-lg border border-marca/50 bg-marca/10 p-3 text-sm text-marca">
-            {% for erro in form.non_field_errors %}<p>{{ erro }}</p>{% endfor %}
+          {# Erro de formulario acima do primeiro campo, com role="alert". #}
+          <div class="mt-5">
+            {% for erro in form.non_field_errors %}
+              {% include "_componentes/alerta.html" with tipo="erro" texto=erro %}
+            {% endfor %}
           </div>
         {% endif %}
 
-        <form method="post" class="mt-6 space-y-3" novalidate>
+        <form method="post" class="mt-6 space-y-4" novalidate>
           {% csrf_token %}
           {% for campo in form %}{% include "contas/_campo.html" %}{% endfor %}
           {% block extra_form %}{% endblock %}
-          <button type="submit" class="btn-marca w-full">{% block botao %}Enviar{% endblock %}</button>
+          <button type="submit" class="btn-marca btn-lg w-full">{% block botao %}Enviar{% endblock %}</button>
         </form>
 
         {% block rodape %}{% endblock %}
       </div>
     </div>
-  </div>
+  </main>
 {% endblock %}

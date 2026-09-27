@@ -1,0 +1,85 @@
+{% load static %}{% comment %}
+Rodape completo (item 16 da Onda 1).
+
+Estrutura do antigo preservada: bloco de marca com frase e copyright, tres
+colunas de links (Games / Carteira / Ajuda), faixa de selos e texto legal.
+
+Correcoes em relacao ao antigo:
+- hierarquia de heading: o antigo abria a primeira coluna com <h6> e as
+  seguintes com <h5>; aqui as tres sao <h2> (a pagina tem um <h1> no <main>);
+- link de 12px sem altura -> `py-2`, 32px de alvo (secao 5.5);
+- <a href="#"> em Termos/FAQ/Jogo Consciente -> texto apagado enquanto a
+  pagina nao existir;
+- os seis selos do antigo eram imagens hospedadas na CDN da Webflow e
+  afirmavam PCI-DSS e licenca de Curacao da operacao ANTERIOR. Nao foram
+  reproduzidos: selo de conformidade que a operacao nao tem e afirmacao falsa.
+  Ficou o que e verdadeiro (+18, jogo responsavel, PIX).
+{% endcomment %}
+<footer class="mt-12 border-t border-borda">
+  <div class="mx-auto max-w-conteudo px-4 py-10 lg:px-6">
+
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+
+      <div class="lg:pr-6">
+        <img src="{% static 'img/logo-rodape.png' %}" alt="" class="h-7 w-auto opacity-60">
+        <p class="mt-4 max-w-xs text-sm text-texto-2">
+          Todo dia pode ser a sua vez de fazer uma grande jogada!
+        </p>
+        <p class="mt-4 text-2xs text-texto-3">
+          SistemaBet &copy; {% now "Y" %}. Todos os direitos reservados.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-2xs font-semibold uppercase tracking-widest text-texto-2">Games</h2>
+        <ul class="mt-3 space-y-1">
+          {% include "_componentes/link_rodape.html" with rotulo="Populares" destino=url_populares %}
+          {% include "_componentes/link_rodape.html" with rotulo="Cassino" destino=url_cassino %}
+          {% include "_componentes/link_rodape.html" with rotulo="Cassino ao Vivo" destino=url_cassino_aovivo %}
+          {% include "_componentes/link_rodape.html" with rotulo="Provedores" destino=url_provedores %}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-2xs font-semibold uppercase tracking-widest text-texto-2">Carteira</h2>
+        <ul class="mt-3 space-y-1">
+          {% include "_componentes/link_rodape.html" with rotulo="Depositar" destino=url_depositar %}
+          {% include "_componentes/link_rodape.html" with rotulo="Sacar" destino=url_sacar %}
+          {% include "_componentes/link_rodape.html" with rotulo="Minha Conta" destino=url_perfil %}
+          {% include "_componentes/link_rodape.html" with rotulo="Indique e Ganhe" destino=url_indique %}
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-2xs font-semibold uppercase tracking-widest text-texto-2">Ajuda</h2>
+        <ul class="mt-3 space-y-1">
+          {% include "_componentes/link_rodape.html" with rotulo="Termos de Uso" destino=url_termos %}
+          {% include "_componentes/link_rodape.html" with rotulo="FAQ" destino=url_faq %}
+          {% include "_componentes/link_rodape.html" with rotulo="Jogo Consciente" destino=url_jogo_consciente %}
+          {% include "_componentes/link_rodape.html" with rotulo="Suporte" destino=url_suporte %}
+        </ul>
+      </div>
+    </div>
+
+    <ul class="mt-10 flex flex-wrap items-center gap-3 border-t border-borda pt-6">
+      <li class="flex h-10 items-center gap-2 rounded-lg border border-borda bg-fundo-card px-3
+                 text-2xs font-semibold uppercase tracking-widest text-texto-2">
+        PIX
+      </li>
+      <li class="flex h-10 items-center gap-2 rounded-lg border border-erro-borda bg-erro-fundo px-3
+                 text-2xs font-semibold uppercase tracking-widest text-erro">
+        +18
+      </li>
+      <li class="flex h-10 items-center gap-2 rounded-lg border border-borda bg-fundo-card px-3
+                 text-2xs font-semibold uppercase tracking-widest text-texto-2">
+        {% include "_componentes/icone.html" with nome="escudo" classe="h-4 w-4" %}
+        Jogo responsável
+      </li>
+    </ul>
+
+    <p class="mt-6 max-w-3xl text-xs leading-relaxed text-texto-3">
+      Proibido para menores de 18 anos. Apostas envolvem risco de perda financeira.
+      Jogue com responsabilidade e aposte somente o que você pode perder.
+    </p>
+  </div>
+</footer>

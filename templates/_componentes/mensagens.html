@@ -1,0 +1,21 @@
+{% comment %}
+Flash do Django no topo do <main>, acima do <h1> (secao 3.9).
+
+sucesso/info -> role="status"; erro/aviso -> role="alert". Erro nao recebe
+botao de descarte: alerta de erro nao se descarta sozinho nem por engano.
+{% endcomment %}
+{% if messages %}
+  <div class="mb-6 space-y-2">
+    {% for m in messages %}
+      {% if m.level_tag == "success" %}
+        {% include "_componentes/alerta.html" with tipo="sucesso" texto=m descartavel=True %}
+      {% elif m.level_tag == "error" %}
+        {% include "_componentes/alerta.html" with tipo="erro" texto=m %}
+      {% elif m.level_tag == "warning" %}
+        {% include "_componentes/alerta.html" with tipo="aviso" texto=m %}
+      {% else %}
+        {% include "_componentes/alerta.html" with tipo="info" texto=m descartavel=True %}
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}

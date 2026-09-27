@@ -2,7 +2,10 @@
 <html lang="pt-br" class="h-full">
 <head>
   <meta charset="utf-8">
+  {% comment %} Sem maximum-scale e sem user-scalable: o antigo bloqueava o pinch-zoom,
+     reprovacao direta de WCAG 1.4.4. Nao acrescente. {% endcomment %}
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141417">
   <title>{% block titulo %}SistemaBet{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,73 +15,205 @@
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
 </head>
-<body class="min-h-full bg-fundo font-sans text-white antialiased">
+{% comment %}
+Destinos resolvidos uma unica vez, aqui, e herdados por todos os componentes
+incluidos abaixo.
 
-  <header class="sticky top-0 z-40 border-b border-fundo-borda bg-fundo/95 backdrop-blur">
-    <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-      <a href="{% url 'core:home' %}" class="flex items-center">
-        <img src="{% static 'img/logo.png' %}" alt="SistemaBet" class="h-8 w-auto">
-      </a>
+`{% url 'x' as var %}` NAO levanta NoReverseMatch: rota que ainda nao existe
+devolve string vazia. E dai que sai o estado "Em breve" do menu, da barra e do
+rodape — e no dia em que a rota entrar no urls.py, o item vira link sozinho,
+sem tocar em template.
+{% endcomment %}
+{% url 'core:home' as url_home %}
+{% url 'contas:perfil' as url_perfil %}
+{% url 'jogos:catalogo' as url_jogos %}
+{% url 'jogos:populares' as url_populares %}
+{% url 'jogos:roletas' as url_roletas %}
+{% url 'jogos:cassino' as url_cassino %}
+{% url 'jogos:cassino_aovivo' as url_cassino_aovivo %}
+{% url 'jogos:provedores' as url_provedores %}
+{% url 'carteira:depositar' as url_depositar %}
+{% url 'carteira:sacar' as url_sacar %}
+{% url 'carteira:historico' as url_historico %}
+{% url 'afiliados:indique' as url_indique %}
+{% url 'core:suporte' as url_suporte %}
+{% url 'core:termos' as url_termos %}
+{% url 'core:faq' as url_faq %}
+{% url 'core:jogo_consciente' as url_jogo_consciente %}
+<body class="min-h-full bg-fundo pb-tabbar font-sans text-sm text-texto antialiased lg:pb-0"
+      x-data="appShell">
 
-      {% if user.is_authenticated %}
-        <div class="flex items-center gap-3">
-          <div class="rounded-lg border border-fundo-borda bg-fundo-card px-4 py-2 text-right">
-            <div class="text-[10px] uppercase tracking-widest text-white/40">Banca</div>
-            <div class="text-sm font-semibold"><span class="text-marca">R$</span> 0,00</div>
-          </div>
-          <a href="{% url 'contas:perfil' %}" class="btn-vazado">Minha conta</a>
-          <form method="post" action="{% url 'contas:logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn-vazado">Sair</button>
-          </form>
-        </div>
-      {% else %}
-        <div class="flex items-center gap-2">
-          <a href="{% url 'contas:login' %}" class="btn-vazado">Entrar</a>
-          <a href="{% url 'contas:cadastro' %}" class="btn-marca !py-2">Cadastrar</a>
-        </div>
-      {% endif %}
-    </nav>
-  </header>
+  {% comment %} Fundo ambiente: a sensacao do `.eng-bg-wrapper` do antigo sem a imagem e
+     sem a animacao de 50s (movimento continuo sem pausa, WCAG 2.2.2). {% endcomment %}
+  <div class="fundo-ambiente pointer-events-none fixed inset-0 -z-10" aria-hidden="true"></div>
 
-  {% if messages %}
-    <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
-      {% for m in messages %}
-        <div class="mb-2 rounded-lg border px-4 py-3 text-sm
-          {% if m.tags == 'success' %}border-emerald-700/50 bg-emerald-950/40 text-emerald-300
-          {% elif m.tags == 'error' %}border-marca/50 bg-marca/10 text-marca
-          {% else %}border-fundo-borda bg-fundo-card text-white/80{% endif %}">
-          {{ m }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+  {% comment %} Primeiro elemento focavel: sao ~15 links de menu antes do conteudo
+     (WCAG 2.4.1). Nao existia no antigo. {% endcomment %}
+  <a href="#conteudo"
+     class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-80
+            focus:rounded-lg focus:bg-fundo-card focus:px-4 focus:py-2 focus:text-sm
+            focus:font-semibold focus:text-texto focus:ring-2 focus:ring-marca">
+    Pular para o conteúdo
+  </a>
 
-  {% block corpo %}
-    <div class="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
-      <aside class="hidden w-56 shrink-0 space-y-2 lg:block">
-        <a href="{% url 'core:home' %}" class="item-menu">Início</a>
-        <a href="#" class="item-menu">Indique e Ganhe</a>
-        <a href="#" class="item-menu">Todos os jogos</a>
-        <div class="pt-3 text-[10px] uppercase tracking-widest text-white/30">Categorias</div>
-        <a href="#" class="item-menu">Populares</a>
-        <a href="#" class="item-menu">Roletas</a>
-        <a href="#" class="item-menu">Cassino</a>
-        <a href="#" class="item-menu">Cassino Ao vivo</a>
-      </aside>
+  {% include "_componentes/barra_superior.html" %}
 
-      <main class="min-w-0 flex-1">{% block conteudo %}{% endblock %}</main>
-    </div>
-  {% endblock %}
+  {# Overlay da gaveta. Fecha ao clique; z-50, abaixo da gaveta (z-60). #}
+  <div x-show="menuAberto" x-cloak @click="fecharMenu()" aria-hidden="true"
+       x-transition:enter="transition ease-out duration-250"
+       x-transition:enter-start="opacity-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm lg:hidden"></div>
 
-  <footer class="mt-12 border-t border-fundo-borda">
-    <div class="mx-auto max-w-7xl px-4 py-8 text-xs text-white/40 sm:px-6">
-      <img src="{% static 'img/logo-rodape.png' %}" alt="" class="mb-4 h-7 w-auto opacity-60">
-      <p>SistemaBet &copy; {% now "Y" %}. Todos os direitos reservados.</p>
-      <p class="mt-2">
-        Jogue com responsabilidade. Proibido para menores de 18 anos.
-      </p>
-    </div>
-  </footer>
+  <div class="mx-auto flex w-full max-w-conteudo gap-6 px-4 lg:px-6">
+    {# Markup UNICO do menu: gaveta abaixo de `lg`, coluna fixa a partir dali. #}
+    {% include "_componentes/menu_lateral.html" %}
+
+    {% block corpo %}
+      <main id="conteudo" class="min-w-0 flex-1 py-6">
+        {% include "_componentes/mensagens.html" %}
+        {% block conteudo %}{% endblock %}
+      </main>
+    {% endblock %}
+  </div>
+
+  {% include "_componentes/rodape.html" %}
+  {% include "_componentes/barra_inferior.html" %}
+
+  <script>
+    document.addEventListener("alpine:init", () => {
+      // Casca da aplicacao: estado da gaveta, foco e travamento de rolagem.
+      Alpine.data("appShell", () => ({
+        menuAberto: false,
+        // `estreito` acompanha o breakpoint `lg` do Tailwind (1024px). E ele
+        // que decide se o menu e gaveta (dialogo modal, foco preso) ou coluna
+        // fixa — o markup e o mesmo nos dois casos.
+        estreito: false,
+        gatilho: null,
+
+        init() {
+          const consulta = window.matchMedia("(max-width: 1023.98px)");
+
+          const sincronizar = () => {
+            this.estreito = consulta.matches;
+            // Virou desktop com a gaveta aberta: o menu ja esta visivel como
+            // coluna, entao so desfaz o estado de gaveta.
+            if (!this.estreito) this.fecharMenu(false);
+          };
+
+          sincronizar();
+          consulta.addEventListener("change", sincronizar);
+          // Rede de seguranca barata: se o `change` nao chegar, o `resize`
+          // recalcula. O que importa para acessibilidade — a gaveta fechada
+          // sair da ordem de tabulacao — ja e resolvido no CSS por
+          // `visibility`; isto aqui so mantem role/aria-modal em dia.
+          window.addEventListener("resize", sincronizar);
+        },
+
+        abrirMenu(evento) {
+          this.gatilho = evento ? evento.currentTarget : null;
+          this.menuAberto = true;
+          document.documentElement.classList.add("overflow-hidden");
+          this.$nextTick(() => this.$refs.fecharMenu && this.$refs.fecharMenu.focus());
+        },
+
+        fecharMenu(devolverFoco = true) {
+          if (!this.menuAberto) return;
+          this.menuAberto = false;
+          document.documentElement.classList.remove("overflow-hidden");
+          if (devolverFoco && this.gatilho) this.gatilho.focus();
+        },
+
+        // Foco preso dentro da gaveta enquanto ela esta aberta (2.1.2).
+        prenderFoco(evento) {
+          if (!this.menuAberto || !this.estreito) return;
+
+          const itens = Array.from(
+            this.$refs.gaveta.querySelectorAll(
+              'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            )
+          ).filter((elemento) => elemento.offsetParent !== null);
+
+          if (itens.length === 0) return;
+
+          const primeiro = itens[0];
+          const ultimo = itens[itens.length - 1];
+
+          if (evento.shiftKey && document.activeElement === primeiro) {
+            evento.preventDefault();
+            ultimo.focus();
+          } else if (!evento.shiftKey && document.activeElement === ultimo) {
+            evento.preventDefault();
+            primeiro.focus();
+          }
+        },
+
+        // Preferencia de interface (ex.: "Populares" aberto ou fechado no
+        // menu). localStorage lanca excecao em navegacao privada de alguns
+        // navegadores — por isso o try/catch. Nunca guarda dado de pessoa.
+        lerPreferencia(chave, padrao) {
+          try {
+            const valor = localStorage.getItem(chave);
+            return valor === null ? padrao : valor === "1";
+          } catch (erro) {
+            return padrao;
+          }
+        },
+
+        gravarPreferencia(chave, valor) {
+          try {
+            localStorage.setItem(chave, valor ? "1" : "0");
+          } catch (erro) {
+            /* sem persistencia: a preferencia vale so para esta visita */
+          }
+        },
+      }));
+
+      // Menu de conta da barra superior. Abre por CLIQUE (o do antigo abria
+      // por hover, impossivel de acionar sem mouse), circula com as setas e
+      // devolve o foco ao botao no Esc.
+      Alpine.data("menuConta", () => ({
+        aberto: false,
+
+        itens() {
+          return Array.from(
+            this.$refs.painel.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])')
+          );
+        },
+
+        alternar() {
+          this.aberto ? this.fechar(true) : this.abrir(0);
+        },
+
+        abrir(indice) {
+          this.aberto = true;
+          this.$nextTick(() => this.focarIndice(indice));
+        },
+
+        fechar(devolverFoco) {
+          if (!this.aberto) return;
+          this.aberto = false;
+          if (devolverFoco) this.$refs.botao.focus();
+        },
+
+        focarIndice(indice) {
+          const itens = this.itens();
+          if (itens.length === 0) return;
+          const alvo =
+            indice < 0 ? itens[itens.length - 1] : itens[Math.min(indice, itens.length - 1)];
+          alvo.focus();
+        },
+
+        mover(passo) {
+          const itens = this.itens();
+          if (itens.length === 0) return;
+          const atual = itens.indexOf(document.activeElement);
+          const proximo = (atual + passo + itens.length) % itens.length;
+          itens[proximo].focus();
+        },
+      }));
+    });
+  </script>
 </body>
 </html>

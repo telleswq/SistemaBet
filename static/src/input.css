@@ -2,28 +2,157 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------- base */
+
+@layer base {
+  :root {
+    /* Sem isto o dropdown nativo do <select> e o seletor de data abrem em
+       branco sobre um tema escuro (secao 3.2 da especificacao). */
+    color-scheme: dark;
+  }
+
+  /* WCAG 2.3.3 / 2.2.2: nada se move sozinho para quem pediu menos
+     movimento. Vale tambem para as transicoes que o Alpine aplica inline —
+     regra com !important vence declaracao inline sem !important. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Alpine ainda nao inicializou: evita o flash do overlay da gaveta. */
+  [x-cloak] {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------------------------- componentes */
+/* So entra aqui o que aparece em dezenas de lugares ou o que o Django precisa
+   injetar por widget.attrs["class"] (caso de `.campo`, via EstiloMixin em
+   apps/contas/forms.py). O resto e utilitario no template. */
+
 @layer components {
+  /* ---- campo --------------------------------------------------------- */
+  /* Injetado por EstiloMixin. Borda em borda-forte por 1.4.11.
+     O Django 5.2 poe aria-invalid="true" no campo com erro; e dai que sai a
+     borda de erro, sem depender de classe no template. */
   .campo {
-    @apply w-full rounded-lg border border-fundo-borda bg-black/40 px-4 py-3
-           text-sm text-white placeholder-white/30
-           focus:border-marca focus:outline-none focus:ring-1 focus:ring-marca;
+    @apply w-full rounded-lg border border-borda-forte bg-fundo-campo
+           px-4 py-2.5 text-sm text-texto placeholder:text-texto-3
+           transition-colors duration-150 ease-out
+           hover:border-texto-3
+           focus:border-marca focus:outline-none
+           focus-visible:ring-2 focus-visible:ring-marca
+           focus-visible:ring-offset-2 focus-visible:ring-offset-fundo
+           disabled:cursor-not-allowed disabled:border-borda
+           disabled:bg-fundo-card disabled:text-texto-3
+           aria-[invalid=true]:border-erro-forte;
   }
 
+  .campo-com-icone {
+    @apply pl-11; /* icone de 20px + 16px de folga */
+  }
+
+  /* Reserva o espaco do botao mostrar/ocultar senha (40px + folga). */
+  .campo-senha .campo {
+    @apply pr-12;
+  }
+
+  /* Select: mesma caixa do input, seta propria em texto-2, sem a seta do SO.
+     O antigo deixava `.w-select{color:#828282}` e a seta em #666. */
+  select.campo {
+    @apply appearance-none bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27%23A1A1AA%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m6%209%206%206%206-6%27%2F%3E%3C%2Fsvg%3E");
+    background-position: right 12px center;
+    background-size: 16px 16px;
+  }
+
+  textarea.campo {
+    @apply py-3;
+  }
+
+  /* ---- botao --------------------------------------------------------- */
+  .btn {
+    @apply inline-flex h-10 items-center justify-center gap-2 rounded-lg
+           px-4 text-sm font-semibold whitespace-nowrap
+           transition-colors duration-150 ease-out
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-offset-2 focus-visible:ring-offset-fundo
+           disabled:cursor-not-allowed;
+  }
   .btn-marca {
-    @apply inline-flex items-center justify-center rounded-lg bg-marca px-5 py-3
-           text-sm font-semibold text-white transition hover:bg-marca-escuro
-           disabled:opacity-60;
+    @apply btn bg-marca-600 text-white
+           hover:bg-marca-700 active:bg-marca-800
+           focus-visible:ring-white
+           disabled:bg-marca-800 disabled:text-white/55;
   }
-
   .btn-vazado {
-    @apply inline-flex items-center justify-center rounded-lg border
-           border-fundo-borda px-4 py-2 text-sm font-medium text-white
-           transition hover:border-marca hover:text-marca;
+    @apply btn border border-borda-forte bg-fundo-card text-texto
+           hover:border-marca hover:text-marca-400
+           active:bg-fundo-elevado
+           focus-visible:ring-marca
+           disabled:border-borda disabled:text-texto-3;
+  }
+  .btn-fantasma {
+    @apply btn text-texto-2
+           hover:bg-fundo-elevado hover:text-texto
+           active:bg-fundo-card
+           focus-visible:ring-marca
+           disabled:text-texto-3;
   }
 
+  /* Tamanhos DEPOIS das variantes, de proposito: as variantes fazem
+     `@apply btn`, que traz h-10/px-4. Com `.btn-lg` declarado antes, a
+     especificidade e a mesma e quem vence e a regra posterior — ou seja
+     `btn-marca btn-lg` continuaria com 40px de altura. */
+  .btn-sm {
+    @apply h-8 px-3 text-xs;
+  }
+  .btn-lg {
+    @apply h-12 px-6 text-base;
+  }
+
+  /* ---- item de menu lateral ------------------------------------------ */
+  /* `min-h-11` em vez de `h-11`: 44px continua sendo o alvo de toque, mas o
+     rotulo pode quebrar em duas linhas sem vazar do item — acontece na gaveta
+     a 320px e a 200% de zoom. E o que a secao 5.3 pede para 1.4.12 (nada de
+     altura fixa em bloco de texto). */
   .item-menu {
-    @apply flex items-center gap-3 rounded-lg border border-fundo-borda
-           bg-fundo-card px-4 py-3 text-sm text-white/80 transition
-           hover:border-marca hover:text-white;
+    @apply flex min-h-11 items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium
+           text-texto-2 transition-colors duration-150 ease-out
+           hover:bg-fundo-elevado hover:text-texto
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-marca focus-visible:ring-offset-2
+           focus-visible:ring-offset-fundo;
+  }
+  .item-menu-ativo {
+    @apply bg-marca/15 text-marca-300;
+  }
+  /* Destino que ainda nao existe (catalogo/carteira desligados): nao recebe
+     foco nem clique. Secao 3.7, estado "desabilitado". */
+  .item-menu-inativo {
+    @apply cursor-not-allowed text-texto-3 hover:bg-transparent hover:text-texto-3;
+  }
+
+  /* ---- utilitario de dinheiro ---------------------------------------- */
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- fundo ambiente ------------------------------------------------ */
+  /* Substitui .eng-bg-wrapper do antigo: mesma sensacao, sem a imagem e sem a
+     animacao de 50s (movimento continuo sem pausa, WCAG 2.2.2). */
+  .fundo-ambiente {
+    background-image:
+      radial-gradient(60% 50% at 50% 0%, rgba(255, 35, 56, 0.1), transparent 70%),
+      radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      4px 4px;
   }
 }

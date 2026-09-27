@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% comment %}
+Django usa `templates/404.html` automaticamente (django.views.defaults.
+page_not_found), com `request` no contexto — por isso a casca completa
+funciona aqui. Nao precisa de rota nem de view.
+
+O caminho pedido NAO e ecoado na pagina: refletir entrada do usuario em HTML
+foi exatamente a origem do XSS refletido encontrado na auditoria do sistema
+anterior. Ele continua disponivel no log do servidor, onde serve mais.
+{% endcomment %}
+
+{% block titulo %}Página não encontrada — SistemaBet{% endblock %}
+
+{% block conteudo %}
+  <div class="mx-auto max-w-lg rounded-2xl border border-dashed border-borda bg-fundo-card
+              px-6 py-12 text-center">
+    <span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-fundo-elevado text-texto-2">
+      {% include "_componentes/icone.html" with nome="busca-erro" classe="h-7 w-7" %}
+    </span>
+
+    <p class="num mt-4 text-2xs font-semibold uppercase tracking-widest text-texto-3">Erro 404</p>
+    <h1 class="mt-1 text-2xl font-semibold text-texto">Página não encontrada</h1>
+    <p class="mx-auto mt-3 max-w-sm text-sm text-texto-2">
+      O endereço que você abriu não existe, mudou de lugar ou o link veio incompleto.
+    </p>
+
+    <div class="mt-6 flex flex-wrap justify-center gap-3">
+      <a href="{{ url_home }}" class="btn-marca btn-lg">Ir para o início</a>
+      {% if url_suporte %}
+        <a href="{{ url_suporte }}" class="btn-vazado btn-lg" target="_blank" rel="noopener noreferrer">
+          Falar com o suporte
+        </a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

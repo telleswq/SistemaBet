@@ -1,0 +1,51 @@
+{% comment %}
+Alerta (secao 3.9 da especificacao). Um componente para os tres padroes
+desconexos do antigo (`.alert` do Webflow, `alert-<tipo>` do Bootstrap e
+`.eng-alert`/`.ang-alert`).
+
+Parametros:
+  tipo         sucesso | aviso | erro | info   (padrao: info)
+  titulo       opcional; com titulo, o corpo desce para texto-2
+  texto        conteudo (obrigatorio)
+  descartavel  opcional; nunca em erro — erro nao se descarta sozinho
+
+Cada tipo tem FORMA de icone distinta, nao so cor: quem nao distingue verde de
+vermelho ainda diferencia ✓ de ✕ (WCAG 1.4.1). O erro usa rose, nunca a marca:
+"destaque da marca" e "deu errado" nao podem ser a mesma cor.
+{% endcomment %}
+<div {% if descartavel %}x-data="{ visivel: true }" x-show="visivel"{% endif %}
+     role="{% if tipo == 'erro' or tipo == 'aviso' %}alert{% else %}status{% endif %}"
+     class="flex animate-entrada items-start gap-3 rounded-lg border p-4
+            {% if tipo == 'sucesso' %}border-sucesso-borda bg-sucesso-fundo text-sucesso
+            {% elif tipo == 'aviso' %}border-aviso-borda bg-aviso-fundo text-aviso
+            {% elif tipo == 'erro' %}border-erro-borda bg-erro-fundo text-erro
+            {% else %}border-info-borda bg-info-fundo text-info{% endif %}">
+
+  {% if tipo == "sucesso" %}
+    {% include "_componentes/icone.html" with nome="sucesso" %}
+  {% elif tipo == "aviso" %}
+    {% include "_componentes/icone.html" with nome="aviso" %}
+  {% elif tipo == "erro" %}
+    {% include "_componentes/icone.html" with nome="erro" %}
+  {% else %}
+    {% include "_componentes/icone.html" with nome="info" %}
+  {% endif %}
+
+  <div class="min-w-0 flex-1">
+    {% if titulo %}
+      <p class="text-sm font-semibold text-texto">{{ titulo }}</p>
+      <p class="mt-1 text-sm text-texto-2">{{ texto }}</p>
+    {% else %}
+      <p class="text-sm">{{ texto }}</p>
+    {% endif %}
+  </div>
+
+  {% if descartavel %}
+    <button type="button" @click="visivel = false" aria-label="Fechar aviso"
+            class="-m-1 grid h-8 w-8 shrink-0 place-items-center rounded transition-colors
+                   duration-150 ease-out hover:bg-white/10 focus-visible:outline-none
+                   focus-visible:ring-2 focus-visible:ring-marca">
+      {% include "_componentes/icone.html" with nome="fechar" classe="h-4 w-4" %}
+    </button>
+  {% endif %}
+</div>

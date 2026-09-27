@@ -1,0 +1,111 @@
+{% comment %}
+Barra inferior mobile (secao 2.4 da especificacao, item 7 da Onda 1).
+
+5 destinos, `flex-1` cada, 64px de altura, icone de 20px + rotulo `text-2xs`.
+Item ativo com `border-t-2 border-marca` e `text-marca` mais
+`aria-current="page"` — o antigo ja reservava `border-top:2px solid
+transparent` e nunca usou.
+
+Complementar ao menu lateral, nao redundante: e o mesmo conjunto de destinos
+frequentes que o antigo tinha (Menu, Ao vivo, Cassino, Conta, Sair).
+{% endcomment %}
+<nav aria-label="Navegação rápida"
+     class="fixed bottom-0 left-0 right-0 z-40 flex min-h-tabbar border-t border-borda
+            bg-fundo pb-[env(safe-area-inset-bottom)] lg:hidden">
+
+  <button type="button"
+          @click="abrirMenu($event)"
+          x-bind:aria-expanded="menuAberto"
+          aria-controls="menu-lateral"
+          class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 border-transparent
+                 text-2xs font-medium text-texto-2 transition-colors duration-150 ease-out
+                 hover:text-texto focus-visible:outline-none focus-visible:ring-2
+                 focus-visible:ring-inset focus-visible:ring-marca">
+    {% include "_componentes/icone.html" with nome="menu" %}
+    <span>Menu</span>
+  </button>
+
+  {% if url_cassino_aovivo %}
+    <a href="{{ url_cassino_aovivo }}"
+       {% if request.resolver_match.view_name == "jogos:cassino_aovivo" %}aria-current="page"{% endif %}
+       class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 text-2xs font-medium
+              transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-inset focus-visible:ring-marca
+              {% if request.resolver_match.view_name == "jogos:cassino_aovivo" %}border-marca text-marca{% else %}border-transparent text-texto-2 hover:text-texto{% endif %}">
+      {% include "_componentes/icone.html" with nome="ao-vivo" %}
+      <span>Ao vivo</span>
+    </a>
+  {% else %}
+    <span aria-disabled="true"
+          class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 border-transparent
+                 text-2xs font-medium text-texto-3">
+      {% include "_componentes/icone.html" with nome="ao-vivo" %}
+      <span>Ao vivo</span>
+      <span class="sr-only">(em breve)</span>
+    </span>
+  {% endif %}
+
+  {% if url_cassino %}
+    <a href="{{ url_cassino }}"
+       {% if request.resolver_match.view_name == "jogos:cassino" %}aria-current="page"{% endif %}
+       class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 text-2xs font-medium
+              transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-inset focus-visible:ring-marca
+              {% if request.resolver_match.view_name == "jogos:cassino" %}border-marca text-marca{% else %}border-transparent text-texto-2 hover:text-texto{% endif %}">
+      {% include "_componentes/icone.html" with nome="cassino" %}
+      <span>Cassino</span>
+    </a>
+  {% else %}
+    <span aria-disabled="true"
+          class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 border-transparent
+                 text-2xs font-medium text-texto-3">
+      {% include "_componentes/icone.html" with nome="cassino" %}
+      <span>Cassino</span>
+      <span class="sr-only">(em breve)</span>
+    </span>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+    <a href="{{ url_perfil }}"
+       {% if request.resolver_match.view_name == "contas:perfil" %}aria-current="page"{% endif %}
+       class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 text-2xs font-medium
+              transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-inset focus-visible:ring-marca
+              {% if request.resolver_match.view_name == "contas:perfil" %}border-marca text-marca{% else %}border-transparent text-texto-2 hover:text-texto{% endif %}">
+      {% include "_componentes/icone.html" with nome="conta" %}
+      <span>Conta</span>
+    </a>
+
+    {# Sair por POST, tambem aqui. #}
+    <form method="post" action="{% url 'contas:logout' %}" class="flex flex-1">
+      {% csrf_token %}
+      <button type="submit"
+              class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 border-transparent
+                     text-2xs font-medium text-texto-2 transition-colors duration-150 ease-out
+                     hover:text-texto focus-visible:outline-none focus-visible:ring-2
+                     focus-visible:ring-inset focus-visible:ring-marca">
+        {% include "_componentes/icone.html" with nome="sair" %}
+        <span>Sair</span>
+      </button>
+    </form>
+  {% else %}
+    <a href="{% url 'contas:login' %}"
+       {% if request.resolver_match.view_name == "contas:login" %}aria-current="page"{% endif %}
+       class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 text-2xs font-medium
+              transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-inset focus-visible:ring-marca
+              {% if request.resolver_match.view_name == "contas:login" %}border-marca text-marca{% else %}border-transparent text-texto-2 hover:text-texto{% endif %}">
+      {% include "_componentes/icone.html" with nome="conta" %}
+      <span>Entrar</span>
+    </a>
+    <a href="{% url 'contas:cadastro' %}"
+       {% if request.resolver_match.view_name == "contas:cadastro" %}aria-current="page"{% endif %}
+       class="flex flex-1 flex-col items-center justify-center gap-1 border-t-2 text-2xs font-medium
+              transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-inset focus-visible:ring-marca
+              {% if request.resolver_match.view_name == "contas:cadastro" %}border-marca text-marca{% else %}border-transparent text-texto-2 hover:text-texto{% endif %}">
+      {% include "_componentes/icone.html" with nome="indique" %}
+      <span>Cadastrar</span>
+    </a>
+  {% endif %}
+</nav>

@@ -2,35 +2,63 @@
 {% block titulo %}Minha conta{% endblock %}
 
 {% block conteudo %}
-  <h1 class="text-2xl font-bold tracking-tight">Minha conta</h1>
+  <h1 class="text-2xl font-semibold tracking-tight text-texto">Minha conta</h1>
+  <p class="mt-1 text-sm text-texto-2">
+    Seus dados de identificação e o destino dos seus saques.
+  </p>
 
-  <div class="mt-4 grid gap-3 sm:grid-cols-3">
-    <div class="rounded-lg border border-fundo-borda bg-fundo-card p-4">
-      <div class="text-[10px] uppercase tracking-widest text-white/40">CPF</div>
-      <div class="mt-1 text-sm font-medium">{{ user.cpf_formatado }}</div>
+  <div class="mt-6 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl border border-borda bg-fundo-card p-4">
+      <p class="text-2xs font-medium uppercase tracking-widest text-texto-2">CPF</p>
+      <p class="num mt-1 text-sm font-medium text-texto">{{ user.cpf_formatado }}</p>
     </div>
-    <div class="rounded-lg border border-fundo-borda bg-fundo-card p-4">
-      <div class="text-[10px] uppercase tracking-widest text-white/40">Verificação</div>
-      <div class="mt-1 text-sm font-medium">{{ user.get_status_kyc_display }}</div>
+
+    <div class="rounded-2xl border border-borda bg-fundo-card p-4">
+      <p class="text-2xs font-medium uppercase tracking-widest text-texto-2">Verificação</p>
+      <p class="mt-1">
+        <span class="inline-flex h-6 items-center gap-1.5 rounded-lg bg-fundo-elevado px-2
+                     text-xs font-medium text-texto-2">
+          {{ user.get_status_kyc_display }}
+        </span>
+      </p>
     </div>
-    <div class="rounded-lg border border-fundo-borda bg-fundo-card p-4">
-      <div class="text-[10px] uppercase tracking-widest text-white/40">Saque liberado</div>
-      <div class="mt-1 text-sm font-medium">
-        {% if user.pode_sacar %}Sim{% else %}<span class="text-marca">Não</span>{% endif %}
-      </div>
+
+    <div class="rounded-2xl border border-borda bg-fundo-card p-4">
+      <p class="text-2xs font-medium uppercase tracking-widest text-texto-2">Saque liberado</p>
+      <p class="mt-1">
+        {# Estado com icone + texto, nunca so cor (WCAG 1.4.1). #}
+        {% if user.pode_sacar %}
+          <span class="inline-flex h-6 items-center gap-1.5 rounded-lg bg-sucesso-fundo px-2
+                       text-xs font-medium text-sucesso">
+            {% include "_componentes/icone.html" with nome="sucesso" classe="h-3.5 w-3.5" %}
+            Sim
+          </span>
+        {% else %}
+          <span class="inline-flex h-6 items-center gap-1.5 rounded-lg bg-aviso-fundo px-2
+                       text-xs font-medium text-aviso">
+            {% include "_componentes/icone.html" with nome="aviso" classe="h-3.5 w-3.5" %}
+            Não
+          </span>
+        {% endif %}
+      </p>
     </div>
   </div>
 
-  <div class="mt-6 max-w-xl rounded-2xl border border-fundo-borda bg-fundo-card p-6">
-    <h2 class="font-semibold">Seus dados</h2>
-    <p class="mt-1 text-xs text-white/40">
+  <div class="mt-6 max-w-xl rounded-2xl border border-borda bg-fundo-card p-6">
+    <h2 class="text-lg font-semibold text-texto">Seus dados</h2>
+    <p class="mt-1 text-xs text-texto-2">
       A chave PIX cadastrada aqui é o único destino possível para saques.
     </p>
 
-    <form method="post" class="mt-5 space-y-3" novalidate>
+    <form method="post" class="mt-5 space-y-4" novalidate>
       {% csrf_token %}
+      {% if form.non_field_errors %}
+        {% for erro in form.non_field_errors %}
+          {% include "_componentes/alerta.html" with tipo="erro" texto=erro %}
+        {% endfor %}
+      {% endif %}
       {% for campo in form %}{% include "contas/_campo.html" %}{% endfor %}
-      <button type="submit" class="btn-marca w-full">Salvar</button>
+      <button type="submit" class="btn-marca btn-lg w-full">Salvar</button>
     </form>
   </div>
 {% endblock %}

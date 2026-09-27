@@ -1,0 +1,168 @@
+{% load static %}{% comment %}
+Barra superior com saldo (secao 3.6 da especificacao).
+
+56px abaixo de `lg`, 64px a partir dali. Em mobile o rotulo "Banca" e a
+palavra "Depositar" saem (era o `.no-mobile{display:none}` do antigo) e o
+botao `+` mantem rotulo acessivel.
+
+Diferencas deliberadas em relacao ao antigo:
+- o saldo nao e mais <h4> (heading usado como dado) e existe UMA vez no
+  documento — o antigo repetia `id="balance"` na barra e na copia mobile;
+- o menu de conta abre por CLIQUE, nao por hover (`data-hover="true"` do
+  antigo e impossivel de abrir sem mouse);
+- "Sair" e formulario POST com CSRF, nao <a href=".../logout">.
+{% endcomment %}
+<header class="sticky top-0 z-30 h-barra-sm border-b border-borda bg-fundo/95 backdrop-blur lg:h-barra">
+  <div class="mx-auto flex h-full max-w-conteudo items-center gap-2 px-4 lg:gap-3 lg:px-6">
+
+    {# Gatilho da gaveta: 44x44px, so abaixo de `lg`. #}
+    <button type="button"
+            @click="abrirMenu($event)"
+            x-bind:aria-expanded="menuAberto"
+            aria-controls="menu-lateral"
+            aria-label="Abrir menu"
+            class="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-texto-2
+                   transition-colors duration-150 ease-out hover:bg-fundo-elevado hover:text-texto
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca
+                   focus-visible:ring-offset-2 focus-visible:ring-offset-fundo lg:hidden">
+      {% include "_componentes/icone.html" with nome="menu" %}
+    </button>
+
+    <a href="{{ url_home }}"
+       class="flex shrink-0 items-center rounded-lg focus-visible:outline-none focus-visible:ring-2
+              focus-visible:ring-marca focus-visible:ring-offset-2 focus-visible:ring-offset-fundo">
+      <img src="{% static 'img/logo.png' %}" alt="SistemaBet — página inicial" class="h-5 w-auto sm:h-6 lg:h-8">
+    </a>
+
+    <div class="ml-auto flex min-w-0 items-center gap-2 lg:gap-3">
+      {% if user.is_authenticated %}
+
+        {% comment %} Bloco de saldo. `num` (tabular-nums) evita que o valor mude de
+           largura a cada atualizacao. O valor vem em R$ 0,00 ate a Fase 2:
+           saldo derivado de ledger, nunca campo solto. {% endcomment %}
+        <div class="flex h-10 shrink-0 flex-col justify-center rounded-lg border border-borda bg-fundo-card px-2 sm:px-3 lg:px-4">
+          <span class="hidden text-2xs font-medium uppercase leading-none tracking-widest text-texto-2 lg:block">
+            Banca
+          </span>
+          <span id="saldo" aria-live="polite" aria-atomic="true"
+                class="num text-sm font-semibold leading-tight text-texto">
+            <span class="text-marca-400">R$</span> 0,00
+          </span>
+        </div>
+
+        {% if url_depositar %}
+          <a href="{{ url_depositar }}" aria-label="Depositar"
+             class="btn-marca h-11 w-11 p-0 lg:h-10 lg:w-auto lg:px-4">
+            {% include "_componentes/icone.html" with nome="mais" classe="h-5 w-5" %}
+            <span class="hidden lg:inline">Depositar</span>
+          </a>
+        {% else %}
+          <button type="button" disabled aria-label="Depositar — em breve"
+                  class="btn-marca h-11 w-11 p-0 lg:h-10 lg:w-auto lg:px-4">
+            {% include "_componentes/icone.html" with nome="mais" classe="h-5 w-5" %}
+            <span class="hidden lg:inline">Depositar</span>
+          </button>
+        {% endif %}
+
+        {% comment %} Menu de conta. Avatar escondido em mobile (a conta esta na gaveta e
+           na barra inferior), como o `.eng-letter-name.no-mobile` do antigo. {% endcomment %}
+        <div class="relative hidden lg:block" x-data="menuConta">
+          <button type="button" x-ref="botao"
+                  @click="alternar()"
+                  @keydown.arrow-down.prevent="abrir(0)"
+                  @keydown.arrow-up.prevent="abrir(-1)"
+                  aria-haspopup="menu"
+                  x-bind:aria-expanded="aberto"
+                  aria-controls="menu-conta"
+                  class="grid h-10 w-10 place-items-center rounded-full border border-borda-forte
+                         bg-fundo-card text-sm font-semibold text-texto
+                         transition-colors duration-150 ease-out hover:border-marca
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca
+                         focus-visible:ring-offset-2 focus-visible:ring-offset-fundo">
+            <span aria-hidden="true">{{ user.nome_completo|first|upper|default:"?" }}</span>
+            <span class="sr-only">Sua conta</span>
+          </button>
+
+          <div id="menu-conta" x-ref="painel" role="menu" aria-label="Sua conta"
+               x-show="aberto" x-cloak
+               @click.outside="fechar(false)"
+               @keydown.escape.prevent.stop="fechar(true)"
+               @keydown.arrow-down.prevent="mover(1)"
+               @keydown.arrow-up.prevent="mover(-1)"
+               @focusout="if (!$el.contains($event.relatedTarget)) fechar(false)"
+               x-transition:enter="transition ease-out duration-200"
+               x-transition:enter-start="opacity-0 translate-y-1"
+               x-transition:leave="transition ease-in duration-150"
+               x-transition:leave-end="opacity-0"
+               class="absolute right-0 top-12 z-60 w-64 origin-top-right overflow-hidden rounded-2xl
+                      border border-borda bg-fundo-card shadow-lg shadow-black/40">
+
+            <a href="{{ url_perfil }}" role="menuitem" tabindex="-1"
+               class="block bg-fundo-elevado px-4 py-3 transition-colors duration-150 ease-out
+                      hover:bg-borda focus-visible:outline-none focus-visible:ring-2
+                      focus-visible:ring-inset focus-visible:ring-marca">
+              <span class="block truncate text-sm font-medium text-texto">{{ user.nome_completo|default:user.email }}</span>
+              <span class="block truncate text-xs text-texto-3">{{ user.email }}</span>
+            </a>
+
+            <div class="p-2">
+              {% if url_depositar %}
+                <a href="{{ url_depositar }}" role="menuitem" tabindex="-1" class="item-menu">
+                  {% include "_componentes/icone.html" with nome="carteira" classe="h-4 w-4" %}
+                  <span>Depositar</span>
+                </a>
+              {% else %}
+                <span role="menuitem" aria-disabled="true" class="item-menu item-menu-inativo">
+                  {% include "_componentes/icone.html" with nome="carteira" classe="h-4 w-4" %}
+                  <span>Depositar</span>
+                  <span class="ml-auto text-2xs">Em breve</span>
+                </span>
+              {% endif %}
+
+              {% if url_sacar %}
+                <a href="{{ url_sacar }}" role="menuitem" tabindex="-1" class="item-menu">
+                  {% include "_componentes/icone.html" with nome="saque" classe="h-4 w-4" %}
+                  <span>Sacar</span>
+                </a>
+              {% else %}
+                <span role="menuitem" aria-disabled="true" class="item-menu item-menu-inativo">
+                  {% include "_componentes/icone.html" with nome="saque" classe="h-4 w-4" %}
+                  <span>Sacar</span>
+                  <span class="ml-auto text-2xs">Em breve</span>
+                </span>
+              {% endif %}
+
+              {% if url_historico %}
+                <a href="{{ url_historico }}" role="menuitem" tabindex="-1" class="item-menu">
+                  {% include "_componentes/icone.html" with nome="historico" classe="h-4 w-4" %}
+                  <span>Histórico</span>
+                </a>
+              {% else %}
+                <span role="menuitem" aria-disabled="true" class="item-menu item-menu-inativo">
+                  {% include "_componentes/icone.html" with nome="historico" classe="h-4 w-4" %}
+                  <span>Histórico</span>
+                  <span class="ml-auto text-2xs">Em breve</span>
+                </span>
+              {% endif %}
+
+              <hr class="my-2 border-borda">
+
+              <form method="post" action="{% url 'contas:logout' %}">
+                {% csrf_token %}
+                <button type="submit" role="menuitem" tabindex="-1"
+                        class="item-menu w-full text-erro hover:bg-erro-fundo hover:text-erro">
+                  {% include "_componentes/icone.html" with nome="sair" classe="h-4 w-4" %}
+                  <span>Sair</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      {% else %}
+        <a href="{% url 'contas:login' %}" class="btn-vazado hidden px-3 text-xs sm:inline-flex lg:px-4 lg:text-sm">Entrar</a>
+        <a href="{% url 'contas:cadastro' %}" class="btn-marca px-3 text-xs lg:px-4 lg:text-sm">Cadastrar</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

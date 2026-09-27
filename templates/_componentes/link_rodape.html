@@ -1,0 +1,23 @@
+{% comment %}
+Link de coluna do rodape. `py-2` da 32px de alvo de toque: no antigo era um
+texto de 12px sem altura nenhuma (secao 5.5).
+
+Sem destino ainda -> texto apagado com "(em breve)" para leitor de tela, em
+vez de <a href="#"> que nao leva a lugar nenhum (era o caso de Termos, FAQ e
+Jogo Consciente no antigo).
+{% endcomment %}
+{% if destino %}
+  <li>
+    <a href="{{ destino }}"
+       class="inline-flex items-center rounded py-2 text-sm text-texto-2 transition-colors
+              duration-150 ease-out hover:text-marca-400 focus-visible:outline-none
+              focus-visible:ring-2 focus-visible:ring-marca focus-visible:ring-offset-2
+              focus-visible:ring-offset-fundo">{{ rotulo }}</a>
+  </li>
+{% else %}
+  <li>
+    <span class="inline-flex items-center py-2 text-sm text-texto-3">
+      {{ rotulo }}<span class="sr-only"> (em breve)</span>
+    </span>
+  </li>
+{% endif %}
