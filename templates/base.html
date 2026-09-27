@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
@@ -15,9 +16,8 @@
 
   <header class="sticky top-0 z-40 border-b border-fundo-borda bg-fundo/95 backdrop-blur">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-      <a href="{% url 'core:home' %}" class="flex items-center gap-2">
-        <span class="grid h-8 w-8 place-items-center rounded-lg bg-marca text-sm font-bold">S</span>
-        <span class="text-lg font-bold tracking-tight">SistemaBet</span>
+      <a href="{% url 'core:home' %}" class="flex items-center">
+        <img src="{% static 'img/logo.png' %}" alt="SistemaBet" class="h-8 w-auto">
       </a>
 
       {% if user.is_authenticated %}
@@ -73,6 +73,7 @@
 
   <footer class="mt-12 border-t border-fundo-borda">
     <div class="mx-auto max-w-7xl px-4 py-8 text-xs text-white/40 sm:px-6">
+      <img src="{% static 'img/logo-rodape.png' %}" alt="" class="mb-4 h-7 w-auto opacity-60">
       <p>SistemaBet &copy; {% now "Y" %}. Todos os direitos reservados.</p>
       <p class="mt-2">
         Jogue com responsabilidade. Proibido para menores de 18 anos.
