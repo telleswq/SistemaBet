@@ -4,20 +4,80 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block titulo %}SistemaBet{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
 </head>
-<body class="h-full bg-slate-950 text-slate-100 antialiased">
-  <header class="border-b border-slate-800">
-    <nav class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-      <a href="{% url 'core:home' %}" class="text-lg font-semibold tracking-tight">SistemaBet</a>
-      <span class="text-xs uppercase tracking-widest text-slate-500">fundacao</span>
+<body class="min-h-full bg-fundo font-sans text-white antialiased">
+
+  <header class="sticky top-0 z-40 border-b border-fundo-borda bg-fundo/95 backdrop-blur">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <a href="{% url 'core:home' %}" class="flex items-center gap-2">
+        <span class="grid h-8 w-8 place-items-center rounded-lg bg-marca text-sm font-bold">S</span>
+        <span class="text-lg font-bold tracking-tight">SistemaBet</span>
+      </a>
+
+      {% if user.is_authenticated %}
+        <div class="flex items-center gap-3">
+          <div class="rounded-lg border border-fundo-borda bg-fundo-card px-4 py-2 text-right">
+            <div class="text-[10px] uppercase tracking-widest text-white/40">Banca</div>
+            <div class="text-sm font-semibold"><span class="text-marca">R$</span> 0,00</div>
+          </div>
+          <a href="{% url 'contas:perfil' %}" class="btn-vazado">Minha conta</a>
+          <form method="post" action="{% url 'contas:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-vazado">Sair</button>
+          </form>
+        </div>
+      {% else %}
+        <div class="flex items-center gap-2">
+          <a href="{% url 'contas:login' %}" class="btn-vazado">Entrar</a>
+          <a href="{% url 'contas:cadastro' %}" class="btn-marca !py-2">Cadastrar</a>
+        </div>
+      {% endif %}
     </nav>
   </header>
 
-  <main class="mx-auto max-w-5xl px-6 py-12">
-    {% block conteudo %}{% endblock %}
-  </main>
+  {% if messages %}
+    <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+      {% for m in messages %}
+        <div class="mb-2 rounded-lg border px-4 py-3 text-sm
+          {% if m.tags == 'success' %}border-emerald-700/50 bg-emerald-950/40 text-emerald-300
+          {% elif m.tags == 'error' %}border-marca/50 bg-marca/10 text-marca
+          {% else %}border-fundo-borda bg-fundo-card text-white/80{% endif %}">
+          {{ m }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block corpo %}
+    <div class="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6">
+      <aside class="hidden w-56 shrink-0 space-y-2 lg:block">
+        <a href="{% url 'core:home' %}" class="item-menu">Início</a>
+        <a href="#" class="item-menu">Indique e Ganhe</a>
+        <a href="#" class="item-menu">Todos os jogos</a>
+        <div class="pt-3 text-[10px] uppercase tracking-widest text-white/30">Categorias</div>
+        <a href="#" class="item-menu">Populares</a>
+        <a href="#" class="item-menu">Roletas</a>
+        <a href="#" class="item-menu">Cassino</a>
+        <a href="#" class="item-menu">Cassino Ao vivo</a>
+      </aside>
+
+      <main class="min-w-0 flex-1">{% block conteudo %}{% endblock %}</main>
+    </div>
+  {% endblock %}
+
+  <footer class="mt-12 border-t border-fundo-borda">
+    <div class="mx-auto max-w-7xl px-4 py-8 text-xs text-white/40 sm:px-6">
+      <p>SistemaBet &copy; {% now "Y" %}. Todos os direitos reservados.</p>
+      <p class="mt-2">
+        Jogue com responsabilidade. Proibido para menores de 18 anos.
+      </p>
+    </div>
+  </footer>
 </body>
 </html>

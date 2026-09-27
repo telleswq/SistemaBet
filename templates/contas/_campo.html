@@ -1,0 +1,9 @@
+<div>
+  {{ campo }}
+  {% if campo.help_text %}
+    <p class="mt-1 text-[11px] leading-snug text-white/35">{{ campo.help_text }}</p>
+  {% endif %}
+  {% for erro in campo.errors %}
+    <p class="mt-1 text-xs text-marca">{{ erro }}</p>
+  {% endfor %}
+</div>

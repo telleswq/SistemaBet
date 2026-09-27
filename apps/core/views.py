@@ -2,9 +2,20 @@ from django.db import connection
 from django.http import JsonResponse
 from django.shortcuts import render
 
+CATEGORIAS = [
+    "Roletas ao vivo",
+    "Cassino",
+    "Cassino ao vivo",
+    "Blackjack",
+    "Bacará",
+    "Football Studio",
+    "Game Shows",
+    "Crash Games",
+]
+
 
 def home(request):
-    return render(request, "core/home.html")
+    return render(request, "core/home.html", {"categorias": CATEGORIAS})
 
 
 def health(request):

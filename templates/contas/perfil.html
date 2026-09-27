@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Minha conta{% endblock %}
+
+{% block conteudo %}
+  <h1 class="text-2xl font-bold tracking-tight">Minha conta</h1>
+
+  <div class="mt-4 grid gap-3 sm:grid-cols-3">
+    <div class="rounded-lg border border-fundo-borda bg-fundo-card p-4">
+      <div class="text-[10px] uppercase tracking-widest text-white/40">CPF</div>
+      <div class="mt-1 text-sm font-medium">{{ user.cpf_formatado }}</div>
+    </div>
+    <div class="rounded-lg border border-fundo-borda bg-fundo-card p-4">
+      <div class="text-[10px] uppercase tracking-widest text-white/40">Verificação</div>
+      <div class="mt-1 text-sm font-medium">{{ user.get_status_kyc_display }}</div>
+    </div>
+    <div class="rounded-lg border border-fundo-borda bg-fundo-card p-4">
+      <div class="text-[10px] uppercase tracking-widest text-white/40">Saque liberado</div>
+      <div class="mt-1 text-sm font-medium">
+        {% if user.pode_sacar %}Sim{% else %}<span class="text-marca">Não</span>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 max-w-xl rounded-2xl border border-fundo-borda bg-fundo-card p-6">
+    <h2 class="font-semibold">Seus dados</h2>
+    <p class="mt-1 text-xs text-white/40">
+      A chave PIX cadastrada aqui é o único destino possível para saques.
+    </p>
+
+    <form method="post" class="mt-5 space-y-3" novalidate>
+      {% csrf_token %}
+      {% for campo in form %}{% include "contas/_campo.html" %}{% endfor %}
+      <button type="submit" class="btn-marca w-full">Salvar</button>
+    </form>
+  </div>
+{% endblock %}

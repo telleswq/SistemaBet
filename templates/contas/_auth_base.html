@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block corpo %}
+  <div class="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div class="overflow-hidden rounded-2xl border border-fundo-borda bg-fundo-card
+                shadow-2xl md:grid md:grid-cols-2">
+
+      {# painel visual, equivalente ao banner do modal original #}
+      <div class="relative hidden bg-gradient-to-br from-marca/30 via-fundo to-fundo md:block">
+        <div class="absolute inset-0 opacity-30"
+             style="background-image:radial-gradient(circle at 30% 20%, #FF2338 0, transparent 55%)"></div>
+        <div class="relative flex h-full flex-col justify-end p-8">
+          <div class="text-3xl font-bold leading-tight">
+            Sua próxima<br>rodada começa aqui
+          </div>
+          <p class="mt-3 text-sm text-white/50">
+            Depósito e saque via PIX. Proibido para menores de 18 anos.
+          </p>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-10">
+        <div class="mb-6 grid h-10 w-10 place-items-center rounded-lg bg-marca font-bold">S</div>
+
+        <h3 class="text-xl font-bold">Estamos te esperando para mais uma rodada!</h3>
+        <p class="mt-1 text-sm text-white/50">Insira seus dados e comece a diversão</p>
+
+        <div class="mt-6 flex gap-2 border-b border-fundo-borda">
+          <a href="{% url 'contas:login' %}"
+             class="-mb-px border-b-2 px-4 py-2 text-sm font-semibold
+             {% block aba_entrar %}border-transparent text-white/40 hover:text-white{% endblock %}">
+            Entrar
+          </a>
+          <a href="{% url 'contas:cadastro' %}"
+             class="-mb-px border-b-2 px-4 py-2 text-sm font-semibold
+             {% block aba_cadastrar %}border-transparent text-white/40 hover:text-white{% endblock %}">
+            Cadastrar
+          </a>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="mt-5 rounded-lg border border-marca/50 bg-marca/10 p-3 text-sm text-marca">
+            {% for erro in form.non_field_errors %}<p>{{ erro }}</p>{% endfor %}
+          </div>
+        {% endif %}
+
+        <form method="post" class="mt-6 space-y-3" novalidate>
+          {% csrf_token %}
+          {% for campo in form %}{% include "contas/_campo.html" %}{% endfor %}
+          {% block extra_form %}{% endblock %}
+          <button type="submit" class="btn-marca w-full">{% block botao %}Enviar{% endblock %}</button>
+        </form>
+
+        {% block rodape %}{% endblock %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
