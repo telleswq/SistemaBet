@@ -1,0 +1,83 @@
+# ============================================================================
+# REPOSITORIO PUBLICO. Nada aqui dentro pode conter segredo ou dado de pessoa.
+# Se algo sensivel for commitado, considere VAZADO: reescrever historico nao
+# desfaz clone, fork nem cache do GitHub. Rotacione a credencial.
+# ============================================================================
+
+# --- Segredos e ambiente -----------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+secrets.*
+.secrets/
+credentials.json
+service-account*.json
+
+# Chaves e certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+*.cer
+id_rsa*
+id_ed25519*
+
+# --- Dados de pessoas --------------------------------------------------
+# uploads de KYC (documento, selfie, comprovante) nunca entram no repo
+/media/
+/uploads/
+
+# dumps e backups de banco
+*.sql
+*.sql.gz
+*.dump
+*.bak
+!docs/**/*.sql
+
+# --- Python ------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- Django ------------------------------------------------------------
+*.sqlite3
+*.sqlite3-journal
+/staticfiles/
+local_settings.py
+
+# --- Logs --------------------------------------------------------------
+*.log
+logs/
+
+# --- Node / Tailwind ---------------------------------------------------
+node_modules/
+npm-debug.log*
+.npm/
+
+# --- Docker ------------------------------------------------------------
+docker-compose.override.yml
+
+# --- SO / editor -------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
