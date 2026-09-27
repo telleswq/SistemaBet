@@ -8,11 +8,12 @@ Django 5.2, PostgreSQL 16, Tailwind/HTMX/Alpine, Docker, CI com lint, testes e
 varredura de segredos. Seguranca por padrao (Argon2, CSRF, prod que recusa subir
 sem `SECRET_KEY`). Sem regra de negocio.
 
-## Fase 1 — Contas e identidade
+## Fase 1 — Contas e identidade 🔄 em andamento
 
-Nao depende de nada externo. **Pode comecar agora.**
+Nao depende de nada externo.
 
-- Modelo de usuario proprio (`AbstractUser`) desde o inicio — trocar depois e caro
+- ✅ Modelo de usuario proprio: login por e-mail, CPF unico e validado,
+  maioridade barrada no cadastro, chave PIX no perfil, status de KYC
 - Cadastro, login, recuperacao de senha, limite de tentativas
 - Verificacao de e-mail
 - Perfil: dados pessoais, chave PIX (o saque usa a cadastrada, nunca a do request)
