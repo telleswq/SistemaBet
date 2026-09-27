@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+  <h1 class="text-3xl font-semibold tracking-tight">Fundacao no ar</h1>
+
+  <p class="mt-3 max-w-prose text-slate-400">
+    Django, PostgreSQL, Tailwind, HTMX e Alpine rodando. Sem regra de negocio
+    ainda &mdash; esta e a base sobre a qual a plataforma sera construida.
+  </p>
+
+  <dl class="mt-8 grid gap-4 sm:grid-cols-3">
+    <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+      <dt class="text-xs uppercase tracking-widest text-slate-500">Backend</dt>
+      <dd class="mt-1 font-medium">Django 5 &middot; Python 3.12</dd>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+      <dt class="text-xs uppercase tracking-widest text-slate-500">Banco</dt>
+      <dd class="mt-1 font-medium">PostgreSQL 16</dd>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+      <dt class="text-xs uppercase tracking-widest text-slate-500">Front</dt>
+      <dd class="mt-1 font-medium">Tailwind &middot; HTMX &middot; Alpine</dd>
+    </div>
+  </dl>
+
+  <p class="mt-8 text-sm text-slate-500">
+    Estado da aplicacao: <a class="underline hover:text-slate-300" href="{% url 'core:health' %}">/health/</a>
+  </p>
+{% endblock %}
