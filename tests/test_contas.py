@@ -16,6 +16,8 @@ from apps.contas.validators import calcular_idade, cpf_e_valido, formatar_cpf
 
 Usuario = get_user_model()
 
+SENHA_DE_TESTE = "senha-de-teste-12345"  # gitleaks:allow
+
 CPF_VALIDO = "52998224725"
 CPF_VALIDO_2 = "12345678909"
 MAIOR = date(1990, 5, 20)
@@ -24,7 +26,7 @@ MAIOR = date(1990, 5, 20)
 def criar(**extra):
     dados = {
         "email": "jogador@exemplo.com",
-        "password": "senha-forte-12345",
+        "password": SENHA_DE_TESTE,
         "nome_completo": "Jogador de Teste",
         "cpf": CPF_VALIDO,
         "data_nascimento": MAIOR,
@@ -73,7 +75,7 @@ def test_calcular_idade_no_dia_do_aniversario():
 def test_cria_usuario_com_email_como_login():
     u = criar()
     assert u.email == "jogador@exemplo.com"
-    assert u.check_password("senha-forte-12345")
+    assert u.check_password(SENHA_DE_TESTE)
     assert Usuario.USERNAME_FIELD == "email"
 
 
@@ -127,7 +129,7 @@ def test_cpf_duplicado_tambem_barra_no_banco():
         cpf=CPF_VALIDO,
         data_nascimento=MAIOR,
     )
-    outro.set_password("senha-forte-12345")
+    outro.set_password(SENHA_DE_TESTE)
     with pytest.raises(IntegrityError):
         outro.save()
 
@@ -135,7 +137,7 @@ def test_cpf_duplicado_tambem_barra_no_banco():
 @pytest.mark.django_db
 def test_senha_nao_e_guardada_em_texto():
     u = criar()
-    assert u.password != "senha-forte-12345"
+    assert u.password != SENHA_DE_TESTE
     assert u.password.startswith("argon2")
 
 
@@ -176,7 +178,7 @@ def test_conta_inativa_nao_saca():
 def test_superusuario_tambem_exige_cpf_e_idade_validos():
     u = Usuario.objects.create_superuser(
         email="admin@exemplo.com",
-        password="senha-forte-12345",
+        password=SENHA_DE_TESTE,
         nome_completo="Administrador",
         cpf=CPF_VALIDO,
         data_nascimento=MAIOR,

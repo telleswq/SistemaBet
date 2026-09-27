@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+# Senhas de fixture usadas pelos testes automatizados. Nao sao credenciais:
+# existem so para exercitar o hashing e os validadores de cadastro.
+#
+# A allowlist e por LITERAL, nao por caminho de arquivo. Se um segredo de
+# verdade for colado dentro de tests/, ele continua sendo detectado.
+[allowlist]
+description = "Senhas de fixture dos testes"
+regexes = [
+  '''senha-de-teste-\d+''',
+  '''senha-forte-\d+''',
+]
