@@ -9,8 +9,9 @@
 
 ## Por que isso importa aqui
 
-Cada regra do `CLAUDE.md` e cada decisao do `docs/adr/0001-stack.md` vem de um item
-desta lista. Sem este contexto, as regras parecem paranoia; com ele, sao cicatriz.
+Cada regra de desenvolvimento do projeto e cada decisao do
+`docs/adr/0001-stack.md` vem de um item desta lista. Sem este contexto, as
+regras parecem paranoia; com ele, sao cicatriz.
 
 O padrao que emergiu **nao e "o codigo tem bugs"**. E ausencia sistematica de
 garantias: nada verificava nada. Onde havia verificacao, era acidental.
@@ -49,7 +50,8 @@ Fechar a aba perdia o deposito.
 **Trilha de auditoria quebrada.** Ajustes internos de saldo gravavam o valor a
 partir de uma variavel inexistente: todo lancamento entrava sem valor.
 
-> **Licoes:** regras 1 a 6 do `CLAUDE.md`.
+> **Licoes:** regras de dinheiro (Decimal, atomicidade, falha fechada,
+> idempotencia, validacao de destino, ledger append-only).
 
 ### 2. Controle de acesso — critico
 
@@ -64,15 +66,15 @@ assumir a conta.
 **Atribuicao em massa.** O corpo inteiro da requisicao ia para o banco. Qualquer
 campo que o atacante inventasse era gravado.
 
-> **Licoes:** regras 7, 8 e 10 do `CLAUDE.md`.
+> **Licoes:** regras de acesso (autenticado por padrao, conferir dono do
+> recurso, campos explicitos em vez de atribuicao em massa).
 
 ### 3. Autenticacao — alto
 
 **Senhas em MD5 sem salt**, tanto de jogadores quanto de administradores.
 **CSRF desligado** nos dois aplicativos. **Sem limite de tentativas** de login.
 
-> **Licoes:** regra 9 do `CLAUDE.md`; Argon2 e CSRF tem teste de regressao em
-> `tests/test_smoke.py`.
+> **Licoes:** Argon2 e CSRF tem teste de regressao em `tests/test_smoke.py`.
 
 ### 4. Injecao — medio
 
@@ -87,8 +89,7 @@ expiradas; a API reconheceu o par e recusou apenas por IP nao autorizado.
 Quem instalasse o pacote e configurasse o proprio servidor estaria operando com a
 conta de outra pessoa, possivelmente sem perceber.
 
-> **Licoes:** regras 11 e 12 do `CLAUDE.md`; Gitleaks no CI; `.gitignore` testado
-> arquivo por arquivo.
+> **Licoes:** Gitleaks no CI; `.gitignore` testado arquivo por arquivo.
 
 ### 6. Arquitetura — a razao de fundo
 

@@ -38,6 +38,12 @@ id_ed25519*
 *.bak
 !docs/**/*.sql
 
+# --- Contexto local do desenvolvedor -----------------------------------
+# Notas e configuracao de ferramentas que ficam so na maquina e nao
+# pertencem a um repositorio publico.
+CLAUDE.md
+.claude/
+
 # --- Python ------------------------------------------------------------
 __pycache__/
 *.py[cod]
