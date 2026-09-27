@@ -10,10 +10,10 @@ Correcoes em relacao ao antigo:
 - link de 12px sem altura -> `py-2`, 32px de alvo (secao 5.5);
 - <a href="#"> em Termos/FAQ/Jogo Consciente -> texto apagado enquanto a
   pagina nao existir;
-- os seis selos do antigo eram imagens hospedadas na CDN da Webflow e
-  afirmavam PCI-DSS e licenca de Curacao da operacao ANTERIOR. Nao foram
-  reproduzidos: selo de conformidade que a operacao nao tem e afirmacao falsa.
-  Ficou o que e verdadeiro (+18, jogo responsavel, PIX).
+- os selos de licenca (Curacao, SiGMA) sao os arquivos do proprio projeto, nao
+  hotlink da CDN da Webflow como no antigo;
+- os dados da licenca vem de `settings.OPERACAO`, nao ficam fixos aqui: mudam
+  com a empresa e com a autorizacao, e licenca errada e afirmacao falsa.
 {% endcomment %}
 <footer class="mt-12 border-t border-borda">
   <div class="mx-auto max-w-conteudo px-4 py-10 lg:px-6">
@@ -75,11 +75,34 @@ Correcoes em relacao ao antigo:
         {% include "_componentes/icone.html" with nome="escudo" classe="h-4 w-4" %}
         Jogo responsável
       </li>
+
+      {% comment %}
+      Selos de licenca. Sao imagens de afirmacao regulatoria: o `alt` precisa
+      dizer o que o selo afirma, nao "selo".
+      {% endcomment %}
+      <li class="flex h-10 items-center">
+        <img src="{% static 'img/selos/curacao.png' %}"
+             alt="Licenciado pelo {{ operacao.licenciador }}"
+             class="h-9 w-auto opacity-80 transition hover:opacity-100">
+      </li>
+      <li class="flex h-10 items-center">
+        <img src="{% static 'img/selos/sigma.png' %}"
+             alt="Membro SiGMA"
+             class="h-7 w-auto opacity-80 transition hover:opacity-100">
+      </li>
     </ul>
 
-    <p class="mt-6 max-w-3xl text-xs leading-relaxed text-texto-3">
-      Proibido para menores de 18 anos. Apostas envolvem risco de perda financeira.
-      Jogue com responsabilidade e aposte somente o que você pode perder.
-    </p>
+    <div class="mt-6 max-w-3xl space-y-3 text-xs leading-relaxed text-texto-3">
+      <p>
+        {{ operacao.razao_social }}, registro nº {{ operacao.registro }}, com sede em
+        {{ operacao.endereco }}, é licenciada e autorizada pelo
+        {{ operacao.licenciador }}, operando sob a {{ operacao.licenca }}.
+        Agente de pagamento: {{ operacao.agente_pagamento }}.
+      </p>
+      <p>
+        Proibido para menores de 18 anos. Apostas envolvem risco de perda financeira.
+        Jogue com responsabilidade e aposte somente o que você pode perder.
+      </p>
+    </div>
   </div>
 </footer>

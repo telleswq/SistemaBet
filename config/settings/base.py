@@ -77,6 +77,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.operacao",
             ],
         },
     },
@@ -180,6 +181,28 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 X_FRAME_OPTIONS = "DENY"
+
+# --- Licenca e dados da operacao ---------------------------------------
+# Ficam aqui, e nao no template, porque mudam com a empresa e com a
+# autorizacao — e porque exibir licenca errada e afirmacao falsa.
+# Os valores padrao sao os que a plataforma anterior exibia.
+
+OPERACAO = {
+    "razao_social": env("OPERACAO_RAZAO_SOCIAL", "Nexus"),
+    "registro": env("OPERACAO_REGISTRO", "150731"),
+    "endereco": env("OPERACAO_ENDERECO", "Groot Kwartierweg 10, Curacao"),
+    "licenca": env(
+        "OPERACAO_LICENCA",
+        "Master License of Gaming Services Provider, N.V. #365/JAZ "
+        "License Number: GLH-OCCHKTW0709172018",
+    ),
+    "licenciador": env("OPERACAO_LICENCIADOR", "Governo de Curacao"),
+    "agente_pagamento": env(
+        "OPERACAO_AGENTE_PAGAMENTO",
+        "Horangi Trading Limited, Chytron 30, 2nd floor, Flat/Office A22, "
+        "1075, Nicosia, Chipre — registro HE 411494",
+    ),
+}
 
 # --- E-mail ------------------------------------------------------------
 
