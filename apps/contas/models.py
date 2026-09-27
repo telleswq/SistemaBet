@@ -9,6 +9,7 @@ requisicao — foi assim que o sistema anterior permitia sacar para qualquer
 destino.
 """
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
@@ -123,6 +124,13 @@ class Usuario(AbstractUser):
 
     # --- verificacao ------------------------------------------------------
     email_verificado = models.BooleanField(_("e-mail verificado"), default=False)
+    # quando foi confirmado. Serve de trilha de auditoria e prova que o link de
+    # uso unico so rodou uma vez: um segundo clique nao mexe neste carimbo.
+    email_verificado_em = models.DateTimeField(
+        _("e-mail verificado em"),
+        null=True,
+        blank=True,
+    )
 
     status_kyc = models.CharField(
         _("status do KYC"),
@@ -182,3 +190,38 @@ class Usuario(AbstractUser):
         self.status_kyc = status
         self.kyc_atualizado_em = timezone.now()
         self.save(update_fields=["status_kyc", "kyc_atualizado_em", "atualizado_em"])
+
+
+class EnvioVerificacaoEmail(models.Model):
+    """
+    Registro de cada link de verificacao de e-mail disparado.
+
+    Existe para limitar o reenvio. Contador em cache nao serve: o cache padrao
+    e por processo (LocMemCache) e some no restart — o limite valeria por worker
+    do gunicorn, ou seja, nao valeria. No banco o limite e o mesmo para toda a
+    aplicacao e sobrevive a deploy.
+
+    Nao guarda IP nem o token: o reenvio exige sessao, entao o par
+    (usuario, horario) ja identifica o pedido. Menos dado pessoal guardado,
+    menos dado a proteger — e token em tabela e credencial em repouso.
+    """
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="envios_verificacao_email",
+        verbose_name=_("usuario"),
+    )
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("envio de verificacao de e-mail")
+        verbose_name_plural = _("envios de verificacao de e-mail")
+        ordering = ["-criado_em"]
+        indexes = [
+            models.Index(fields=["usuario", "-criado_em"], name="contas_envio_verif_idx"),
+        ]
+
+    def __str__(self):
+        # sem e-mail: este texto vai para log e para o admin
+        return f"envio #{self.pk} (usuario {self.usuario_id})"

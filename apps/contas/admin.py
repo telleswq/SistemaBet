@@ -11,13 +11,29 @@ class UsuarioAdmin(BaseUserAdmin):
     list_display = ["email", "nome_completo", "cpf_formatado", "status_kyc", "is_active"]
     list_filter = ["status_kyc", "email_verificado", "is_active", "is_staff"]
     search_fields = ["email", "nome_completo", "cpf"]
-    readonly_fields = ["criado_em", "atualizado_em", "last_login", "kyc_atualizado_em"]
+    readonly_fields = [
+        "criado_em",
+        "atualizado_em",
+        "last_login",
+        "kyc_atualizado_em",
+        "email_verificado_em",
+    ]
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         (_("Identidade"), {"fields": ("nome_completo", "cpf", "data_nascimento", "telefone")}),
         (_("Recebimento"), {"fields": ("chave_pix", "tipo_chave_pix")}),
-        (_("Verificacao"), {"fields": ("email_verificado", "status_kyc", "kyc_atualizado_em")}),
+        (
+            _("Verificacao"),
+            {
+                "fields": (
+                    "email_verificado",
+                    "email_verificado_em",
+                    "status_kyc",
+                    "kyc_atualizado_em",
+                )
+            },
+        ),
         (
             _("Permissoes"),
             {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},

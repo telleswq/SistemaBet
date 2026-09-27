@@ -1,0 +1,12 @@
+{% autoescape off %}Ola, {{ nome }}.
+
+Falta um passo para concluir a criacao da sua conta: confirme que este e-mail e
+seu acessando o link abaixo.
+
+{{ link }}
+
+O link vale {{ validade_horas }} horas e so pode ser usado uma vez.
+
+Se nao foi voce quem se cadastrou, ignore esta mensagem. Nenhuma conta e
+confirmada sem esse acesso.
+{% endautoescape %}
