@@ -10,7 +10,59 @@ antigo faz.
 {% endcomment %}
 
 {% block conteudo %}
-  <section class="overflow-hidden rounded-2xl border border-borda
+  {% comment %}
+  Carrossel de banners, como no sistema anterior. La as imagens vinham da
+  tabela `banner`; aqui sao estaticas ate a tela de administracao existir
+  (fase 5) — trocar a origem depois nao mexe neste markup.
+
+  O antigo trocava o banner sem controle de teclado e sem pausa. Aqui ha setas,
+  marcadores, pausa no hover e respeito a `prefers-reduced-motion`: quem pediu
+  menos movimento nao recebe troca automatica.
+  {% endcomment %}
+  <section x-data="carrossel"
+           class="relative aspect-[1200/420] overflow-hidden rounded-2xl border border-borda bg-fundo-card"
+           aria-roledescription="carrossel" aria-label="Destaques"
+           @mouseenter="pausar()" @mouseleave="retomar()">
+
+    <template x-for="(b, i) in banners" :key="i">
+      {# slides sobrepostos: sem `absolute` o crossfade empilha os dois #}
+      <div x-show="i === atual" x-cloak
+           x-transition:enter="transition ease-out duration-500"
+           x-transition:enter-start="opacity-0"
+           x-transition:leave="transition ease-in duration-500"
+           x-transition:leave-end="opacity-0"
+           class="absolute inset-0"
+           :aria-hidden="i !== atual ? 'true' : null">
+        <img :src="b.src" :alt="b.alt" class="h-full w-full object-cover">
+      </div>
+    </template>
+
+    <button type="button" @click="anterior()" aria-label="Banner anterior"
+            class="absolute left-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center
+                   rounded-full bg-black/50 text-white backdrop-blur transition hover:bg-black/70
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca">
+      &#8249;
+    </button>
+    <button type="button" @click="proximo()" aria-label="Próximo banner"
+            class="absolute right-2 top-1/2 z-10 grid h-11 w-11 -translate-y-1/2 place-items-center
+                   rounded-full bg-black/50 text-white backdrop-blur transition hover:bg-black/70
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca">
+      &#8250;
+    </button>
+
+    <div class="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+      <template x-for="(b, i) in banners" :key="'ponto'+i">
+        <button type="button" @click="ir(i)"
+                :aria-label="'Ir para o destaque ' + (i + 1)"
+                :aria-current="i === atual ? 'true' : null"
+                class="h-2 rounded-full transition-all focus-visible:outline-none
+                       focus-visible:ring-2 focus-visible:ring-marca"
+                :class="i === atual ? 'w-6 bg-marca' : 'w-2 bg-white/50 hover:bg-white/80'"></button>
+      </template>
+    </div>
+  </section>
+
+  <section class="mt-6 overflow-hidden rounded-2xl border border-borda
                   bg-gradient-to-br from-marca-900/60 via-fundo-card to-fundo-card p-6 sm:p-8">
     <h1 class="text-3xl font-bold leading-tight text-texto lg:text-4xl">
       Todo dia pode ser a sua vez<br>de fazer uma grande jogada!
@@ -81,4 +133,35 @@ antigo faz.
       {% endif %}
     </div>
   </section>
+{% endblock %}
+
+{% block scripts %}{{ block.super }}{% load static %}
+<script>
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("carrossel", () => ({
+      atual: 0,
+      timer: null,
+      banners: [
+        { src: "{% static 'img/banners/banner-1.jpeg' %}", alt: "Saque instantâneo via PIX" },
+        { src: "{% static 'img/banners/banner-2.jpeg' %}", alt: "Promoção da plataforma" },
+        { src: "{% static 'img/banners/banner-3.jpeg' %}", alt: "Promoção da plataforma" },
+      ],
+      // quem pediu menos movimento nao recebe troca automatica
+      get automatico() {
+        return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      },
+      init() {
+        if (this.automatico) this.retomar();
+      },
+      proximo() { this.atual = (this.atual + 1) % this.banners.length; },
+      anterior() { this.atual = (this.atual - 1 + this.banners.length) % this.banners.length; },
+      ir(i) { this.atual = i; },
+      pausar() { clearInterval(this.timer); this.timer = null; },
+      retomar() {
+        if (!this.automatico || this.timer) return;
+        this.timer = setInterval(() => this.proximo(), 6000);
+      },
+    }));
+  });
+</script>
 {% endblock %}

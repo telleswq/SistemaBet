@@ -1,38 +1,50 @@
 {% load static %}{% comment %}
-Rodape completo (item 16 da Onda 1).
+Rodape, na estrutura do sistema anterior:
 
-Estrutura do antigo preservada: bloco de marca com frase e copyright, tres
-colunas de links (Games / Carteira / Ajuda), faixa de selos e texto legal.
+  1. quatro colunas — marca + tagline + copyright, Games, Carteira, Ajuda
+     (com "Suporte" como botao destacado, nao link de lista);
+  2. faixa de selos em cinza, espalhados;
+  3. faixa escura separada: Gaming Curacao a esquerda, texto legal a direita.
 
-Correcoes em relacao ao antigo:
-- hierarquia de heading: o antigo abria a primeira coluna com <h6> e as
-  seguintes com <h5>; aqui as tres sao <h2> (a pagina tem um <h1> no <main>);
-- link de 12px sem altura -> `py-2`, 32px de alvo (secao 5.5);
-- <a href="#"> em Termos/FAQ/Jogo Consciente -> texto apagado enquanto a
-  pagina nao existir;
-- os selos de licenca (Curacao, SiGMA) sao os arquivos do proprio projeto, nao
-  hotlink da CDN da Webflow como no antigo;
-- os dados da licenca vem de `settings.OPERACAO`, nao ficam fixos aqui: mudam
-  com a empresa e com a autorizacao, e licenca errada e afirmacao falsa.
+Diferencas deliberadas:
+- os selos sao servidos daqui, nao por hotlink da CDN da Webflow: se aquela
+  conta sumir, o selo de licenca sumia do rodape junto;
+- os dados da licenca vem de `settings.OPERACAO`, nao ficam fixos no template;
+- os selos ficam em cinza e ganham cor no hover, como no antigo, mas com
+  `alt` dizendo o que cada um AFIRMA — para leitor de tela a informacao e o
+  conteudo regulatorio, nao a existencia da figura.
 {% endcomment %}
+{% url 'jogos:populares' as url_populares %}
+{% url 'jogos:cassino' as url_cassino %}
+{% url 'jogos:cassino_aovivo' as url_cassino_aovivo %}
+{% url 'jogos:provedores' as url_provedores %}
+{% url 'carteira:depositar' as url_depositar %}
+{% url 'carteira:sacar' as url_sacar %}
+{% url 'afiliados:indique' as url_afiliados %}
+{% url 'core:termos' as url_termos %}
+{% url 'core:faq' as url_faq %}
+{% url 'core:jogo_consciente' as url_jogo_consciente %}
+{% url 'core:suporte' as url_suporte %}
+
 <footer class="mt-12 border-t border-borda">
+
+  {# 1. colunas #}
   <div class="mx-auto max-w-conteudo px-4 py-10 lg:px-6">
+    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
 
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-
-      <div class="lg:pr-6">
-        <img src="{% static 'img/logo-rodape.png' %}" alt="" class="h-7 w-auto opacity-60">
+      <div>
+        <img src="{% static 'img/logo.png' %}" alt="" class="h-7 w-auto">
         <p class="mt-4 max-w-xs text-sm text-texto-2">
           Todo dia pode ser a sua vez de fazer uma grande jogada!
         </p>
-        <p class="mt-4 text-2xs text-texto-3">
-          SistemaBet &copy; {% now "Y" %}. Todos os direitos reservados.
+        <p class="mt-6 text-xs text-texto-3">
+          {{ operacao.razao_social }} &copy; {% now "Y" %}. Todos os direitos reservados.
         </p>
       </div>
 
       <div>
         <h2 class="text-2xs font-semibold uppercase tracking-widest text-texto-2">Games</h2>
-        <ul class="mt-3 space-y-1">
+        <ul class="mt-4 space-y-2">
           {% include "_componentes/link_rodape.html" with rotulo="Populares" destino=url_populares %}
           {% include "_componentes/link_rodape.html" with rotulo="Cassino" destino=url_cassino %}
           {% include "_componentes/link_rodape.html" with rotulo="Cassino ao Vivo" destino=url_cassino_aovivo %}
@@ -42,67 +54,80 @@ Correcoes em relacao ao antigo:
 
       <div>
         <h2 class="text-2xs font-semibold uppercase tracking-widest text-texto-2">Carteira</h2>
-        <ul class="mt-3 space-y-1">
+        <ul class="mt-4 space-y-2">
           {% include "_componentes/link_rodape.html" with rotulo="Depositar" destino=url_depositar %}
           {% include "_componentes/link_rodape.html" with rotulo="Sacar" destino=url_sacar %}
-          {% include "_componentes/link_rodape.html" with rotulo="Minha Conta" destino=url_perfil %}
-          {% include "_componentes/link_rodape.html" with rotulo="Indique e Ganhe" destino=url_indique %}
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'contas:perfil' %}"
+                   class="text-sm text-texto-2 transition hover:text-texto">Minha Conta</a></li>
+          {% else %}
+            {% include "_componentes/link_rodape.html" with rotulo="Minha Conta" destino="" %}
+          {% endif %}
+          {% include "_componentes/link_rodape.html" with rotulo="Afiliados" destino=url_afiliados %}
         </ul>
       </div>
 
       <div>
         <h2 class="text-2xs font-semibold uppercase tracking-widest text-texto-2">Ajuda</h2>
-        <ul class="mt-3 space-y-1">
+        <ul class="mt-4 space-y-2">
           {% include "_componentes/link_rodape.html" with rotulo="Termos de Uso" destino=url_termos %}
           {% include "_componentes/link_rodape.html" with rotulo="FAQ" destino=url_faq %}
           {% include "_componentes/link_rodape.html" with rotulo="Jogo Consciente" destino=url_jogo_consciente %}
-          {% include "_componentes/link_rodape.html" with rotulo="Suporte" destino=url_suporte %}
         </ul>
+
+        {# "Suporte" era um botao destacado, nao um item da lista #}
+        {% if url_suporte %}
+          <a href="{{ url_suporte }}" class="btn btn-vazado mt-5 w-full sm:w-auto">
+            {% include "_componentes/icone.html" with nome="suporte" classe="h-4 w-4" %}
+            Suporte
+          </a>
+        {% else %}
+          <span class="btn btn-vazado mt-5 w-full cursor-not-allowed opacity-60 sm:w-auto"
+                aria-disabled="true">
+            {% include "_componentes/icone.html" with nome="suporte" classe="h-4 w-4" %}
+            Suporte
+          </span>
+        {% endif %}
       </div>
     </div>
 
-    <ul class="mt-10 flex flex-wrap items-center gap-3 border-t border-borda pt-6">
-      <li class="flex h-10 items-center gap-2 rounded-lg border border-borda bg-fundo-card px-3
-                 text-2xs font-semibold uppercase tracking-widest text-texto-2">
-        PIX
-      </li>
-      <li class="flex h-10 items-center gap-2 rounded-lg border border-erro-borda bg-erro-fundo px-3
-                 text-2xs font-semibold uppercase tracking-widest text-erro">
-        +18
-      </li>
-      <li class="flex h-10 items-center gap-2 rounded-lg border border-borda bg-fundo-card px-3
-                 text-2xs font-semibold uppercase tracking-widest text-texto-2">
-        {% include "_componentes/icone.html" with nome="escudo" classe="h-4 w-4" %}
-        Jogo responsável
-      </li>
-
-      {% comment %}
-      Selos de licenca. Sao imagens de afirmacao regulatoria: o `alt` precisa
-      dizer o que o selo afirma, nao "selo".
-      {% endcomment %}
-      <li class="flex h-10 items-center">
-        <img src="{% static 'img/selos/curacao.png' %}"
-             alt="Licenciado pelo {{ operacao.licenciador }}"
-             class="h-9 w-auto opacity-80 transition hover:opacity-100">
-      </li>
-      <li class="flex h-10 items-center">
-        <img src="{% static 'img/selos/sigma.png' %}"
-             alt="Membro SiGMA"
-             class="h-7 w-auto opacity-80 transition hover:opacity-100">
-      </li>
+    {# 2. faixa de selos #}
+    <ul class="mt-10 flex flex-wrap items-center justify-between gap-x-8 gap-y-6
+               border-t border-borda pt-8">
+      <li><img src="{% static 'img/selos/pix.svg' %}" alt="Aceita PIX"
+               class="h-6 w-auto opacity-45 transition hover:opacity-90"></li>
+      <li><img src="{% static 'img/selos/jogo-responsavel.svg' %}" alt="Jogo responsável"
+               class="h-8 w-auto opacity-45 transition hover:opacity-90"></li>
+      <li><img src="{% static 'img/selos/pci-dss.svg' %}" alt="Em conformidade com PCI DSS"
+               class="h-7 w-auto opacity-45 transition hover:opacity-90"></li>
+      <li><img src="{% static 'img/selos/sigma.png' %}" alt="Membro SiGMA"
+               class="h-6 w-auto opacity-45 transition hover:opacity-90"></li>
+      <li><img src="{% static 'img/selos/cgf.svg' %}" alt="Crypto Gambling Foundation — operador verificado"
+               class="h-9 w-auto opacity-45 transition hover:opacity-90"></li>
+      <li><img src="{% static 'img/selos/mais18.svg' %}" alt="Proibido para menores de 18 anos"
+               class="h-8 w-auto opacity-45 transition hover:opacity-90"></li>
     </ul>
+  </div>
 
-    <div class="mt-6 max-w-3xl space-y-3 text-xs leading-relaxed text-texto-3">
-      <p>
-        {{ operacao.razao_social }}, registro nº {{ operacao.registro }}, com sede em
-        {{ operacao.endereco }}, é licenciada e autorizada pelo
-        {{ operacao.licenciador }}, operando sob a {{ operacao.licenca }}.
-        Agente de pagamento: {{ operacao.agente_pagamento }}.
-      </p>
-      <p>
-        Proibido para menores de 18 anos. Apostas envolvem risco de perda financeira.
-        Jogue com responsabilidade e aposte somente o que você pode perder.
-      </p>
+  {# 3. faixa legal, mais escura #}
+  <div class="border-t border-borda bg-black/40">
+    <div class="mx-auto flex max-w-conteudo flex-col gap-6 px-4 py-8 sm:flex-row sm:items-start lg:px-6">
+      <img src="{% static 'img/selos/curacao.png' %}"
+           alt="Licenciado pelo {{ operacao.licenciador }}"
+           class="h-10 w-auto shrink-0 opacity-70">
+
+      <div class="space-y-3 text-xs leading-relaxed text-texto-3">
+        <p>
+          {{ operacao.razao_social }}, registro nº {{ operacao.registro }}, com sede em
+          {{ operacao.endereco }}, é licenciada e autorizada pelo
+          {{ operacao.licenciador }}, operando sob a {{ operacao.licenca }}.
+          Agente de pagamento: {{ operacao.agente_pagamento }}.
+        </p>
+        <p>
+          Apostas podem causar dependência. Jogue com responsabilidade.
+          Proibido para menores de 18 anos.
+        </p>
+      </div>
     </div>
   </div>
 </footer>
