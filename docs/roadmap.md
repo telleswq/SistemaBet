@@ -20,17 +20,23 @@ Nao depende de nada externo.
 - KYC: CPF validado, idade minima 18, upload de documento em `media/` (fora do repo)
 - Log de auditoria de acoes sensiveis
 
-## Fase 2 — Carteira e ledger ⛔ bloqueada
+## Fase 2 — Carteira e ledger ✅ desbloqueada
 
-**Bloqueio:** confirmar com o provedor de jogos se ha suporte a *carteira seamless*.
-Ver a secao "Pendente" do `docs/adr/0001-stack.md`.
+O provedor **suporta seamless**. Decisao registrada em
+[`adr/0002-carteira-seamless.md`](adr/0002-carteira-seamless.md).
 
-Por que bloqueia: em seamless, o saldo tem fonte unica de verdade no nosso banco e
-o provedor chama a nossa API a cada aposta. Em carteira por transferencia, o saldo
-mora la fora e precisamos de conciliacao. **Sao modelos de dados diferentes.**
-Assumir errado significa refazer.
+O saldo tem fonte unica de verdade no nosso banco; o provedor chama a nossa API
+a cada aposta (`transaction`) e para consultar saldo (`user_balance`).
 
-Quando destravar:
+Duas consequencias que mudam requisito:
+
+- passamos a estar no **caminho critico da aposta**. Se o callback cair ou
+  demorar, o jogo trava para o jogador.
+- a autenticacao do callback e so um segredo compartilhado no corpo, sem
+  assinatura nem carimbo de tempo. A **idempotencia em `txn_id`** deixa de ser
+  boa pratica e passa a ser a unica defesa contra repeticao.
+
+O que construir:
 
 - Ledger append-only, dupla entrada, `DECIMAL` sempre
 - Saldo derivado de lancamentos, nunca campo editavel solto

@@ -48,14 +48,12 @@ mobile, expomos DRF; nao antes.
 - Abrimos mao de interatividade rica de SPA. Aceitavel para o escopo atual.
 - Um `runserver` nao serve producao: sera gunicorn atras de proxy com TLS.
 
-## Pendente — decide o nucleo da carteira
+## ~~Pendente~~ — RESOLVIDO em 2026-09-28
 
-O sistema antigo usava **carteira por transferencia** (zerava o saldo no provedor
-e depositava de novo para ajustar). Era a origem da dessincronizacao, da corrida
-e do saque infinito.
+O provedor **suporta carteira seamless**. Ver
+[`0002-carteira-seamless.md`](0002-carteira-seamless.md).
 
-O correto e **carteira seamless**: o provedor chama a nossa API a cada aposta e
-premio, e o saldo tem fonte unica de verdade no nosso banco.
-
-**Confirmar com o provedor de jogos se ha suporte a seamless antes de modelar a
-carteira.** A resposta muda o nucleo do sistema.
+O texto original desta secao dizia que o sistema anterior usava carteira por
+transferencia e que era dai que vinham a dessincronizacao, a corrida e o saque
+infinito — e que confirmar o suporte a seamless era pre-requisito para modelar
+a carteira. A confirmacao veio: o modelo e seamless.
